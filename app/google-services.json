@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "138252053224",
+    "firebase_url": "https://pixelcrafter-e2f23-default-rtdb.firebaseio.com",
+    "project_id": "pixelcrafter-e2f23",
+    "storage_bucket": "pixelcrafter-e2f23.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:138252053224:android:bd0c6e5805125e4fcb775d",
+        "android_client_info": {
+          "package_name": "com.aistudio.pixelcrafter.vrtxpl"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "138252053224-ie7u91av1nbnvp5aeuuqff6eqs8e28rc.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD7GHRe95LsAoIqw9FqtbnkywjVAwcs7FM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "138252053224-ie7u91av1nbnvp5aeuuqff6eqs8e28rc.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

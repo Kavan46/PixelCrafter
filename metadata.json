@@ -1,0 +1,6 @@
+{
+  "name": "PixelCrafter",
+  "description": "High resolution wallpaper explorer with Admin and User controls, custom themes, categories, downloads, and favorites.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
