@@ -159,21 +159,6 @@ fun DetailScreen(
                         tint = Color.White
                     )
                 }
-
-                Box(
-                    modifier = Modifier
-                        .clip(RoundedCornerShape(12.dp))
-                        .background(PremiumElectricBlue.copy(alpha = 0.85f))
-                        .border(1.dp, NeonCyan, RoundedCornerShape(12.dp))
-                        .padding(horizontal = 12.dp, vertical = 6.dp)
-                ) {
-                    Text(
-                        text = wallpaper.category,
-                        color = Color.White,
-                        fontSize = 12.sp,
-                        fontWeight = FontWeight.Bold
-                    )
-                }
             }
         }
 
@@ -193,13 +178,6 @@ fun DetailScreen(
             ) {
                 // Textual identifiers
                 Column {
-                    Text(
-                        text = wallpaper.title,
-                        color = Color.White,
-                        fontSize = 24.sp,
-                        fontWeight = FontWeight.ExtraBold
-                    )
-                    Spacer(modifier = Modifier.height(4.dp))
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween,
@@ -208,8 +186,8 @@ fun DetailScreen(
                         Text(
                             text = "by ${wallpaper.author}",
                             color = NeonCyan,
-                            fontSize = 15.sp,
-                            fontWeight = FontWeight.SemiBold
+                            fontSize = 16.sp,
+                            fontWeight = FontWeight.Bold
                         )
                         Text(
                             text = "${wallpaper.downloads} Downloads",
@@ -474,8 +452,6 @@ fun DetailScreen(
         }
 
         if (showEditDialog) {
-            var editTitle by remember { mutableStateOf(wallpaper.title) }
-            var editCategory by remember { mutableStateOf(wallpaper.category) }
             var editAuthor by remember { mutableStateOf(wallpaper.author) }
 
             AlertDialog(
@@ -493,28 +469,6 @@ fun DetailScreen(
                         modifier = Modifier.fillMaxWidth(),
                         verticalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
-                        // Title Field
-                        Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                            Text("Title Tag", color = NeonCyan, fontSize = 11.sp, fontWeight = FontWeight.Bold)
-                            TextField(
-                                value = editTitle,
-                                onValueChange = { editTitle = it },
-                                colors = TextFieldDefaults.colors(
-                                    focusedContainerColor = MidnightBlack,
-                                    unfocusedContainerColor = MidnightBlack,
-                                    focusedTextColor = IceBlueText,
-                                    unfocusedTextColor = IceBlueText,
-                                    focusedIndicatorColor = PremiumElectricBlue,
-                                    unfocusedIndicatorColor = DeepBlueBorder
-                                ),
-                                shape = RoundedCornerShape(8.dp),
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .border(1.dp, DeepBlueBorder, RoundedCornerShape(8.dp))
-                                    .testTag("edit_title_input")
-                            )
-                        }
-
                         // Author/Creator Field
                         Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                             Text("Author / Creator", color = NeonCyan, fontSize = 11.sp, fontWeight = FontWeight.Bold)
@@ -536,54 +490,17 @@ fun DetailScreen(
                                     .testTag("edit_author_input")
                             )
                         }
-
-                        // Category Pills selector
-                        Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                            Text("Category Selector", color = NeonCyan, fontSize = 11.sp, fontWeight = FontWeight.Bold)
-                            
-                            androidx.compose.foundation.lazy.LazyRow(
-                                horizontalArrangement = Arrangement.spacedBy(6.dp),
-                                modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp)
-                            ) {
-                                // Filter out "All" as wallpapers cannot be assigned to All category directly
-                                val assignableCategories = categories.filter { it != "All" }
-                                items(assignableCategories) { cat ->
-                                    val isSelected = editCategory.equals(cat, ignoreCase = true)
-                                    Box(
-                                        modifier = Modifier
-                                            .clip(RoundedCornerShape(8.dp))
-                                            .background(if (isSelected) ActivePillBlue else SlateNavy.copy(alpha = 0.5f))
-                                            .border(1.dp, if (isSelected) NeonCyan else DeepBlueBorder, RoundedCornerShape(8.dp))
-                                            .clickable { editCategory = cat }
-                                            .padding(horizontal = 12.dp, vertical = 6.dp)
-                                    ) {
-                                        Text(
-                                            text = cat,
-                                            color = if (isSelected) Color.White else MutedSlateText,
-                                            fontSize = 11.sp,
-                                            fontWeight = FontWeight.Bold
-                                        )
-                                    }
-                                }
-                            }
-                        }
                     }
                 },
                 confirmButton = {
                     Button(
                         onClick = {
-                            if (editTitle.isNotBlank() && editCategory.isNotBlank()) {
-                                val updated = wallpaper.copy(
-                                    title = editTitle.trim(),
-                                    category = editCategory.trim(),
-                                    author = editAuthor.trim().ifBlank { "PixelCrafter Admin" }
-                                )
-                                viewModel.updateWallpaper(updated)
-                                showEditDialog = false
-                                android.widget.Toast.makeText(context, "Wallpaper metadata updated!", android.widget.Toast.LENGTH_SHORT).show()
-                            } else {
-                                android.widget.Toast.makeText(context, "Fields cannot be blank", android.widget.Toast.LENGTH_SHORT).show()
-                            }
+                            val updated = wallpaper.copy(
+                                author = editAuthor.trim().ifBlank { "PixelCrafter Admin" }
+                            )
+                            viewModel.updateWallpaper(updated)
+                            showEditDialog = false
+                            android.widget.Toast.makeText(context, "Wallpaper metadata updated!", android.widget.Toast.LENGTH_SHORT).show()
                         },
                         colors = ButtonDefaults.buttonColors(containerColor = PremiumElectricBlue),
                         shape = RoundedCornerShape(10.dp),

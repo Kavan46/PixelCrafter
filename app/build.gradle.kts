@@ -45,6 +45,7 @@ android {
       signingConfig = signingConfigs.getByName("release")
     }
     debug {
+      signingConfig = signingConfigs.getByName("debugConfig")
     }
   }
   compileOptions {
@@ -72,6 +73,7 @@ dependencies {
   implementation(platform(libs.firebase.bom))
   implementation(libs.firebase.auth)
   implementation(libs.firebase.database)
+  implementation(libs.firebase.firestore)
   implementation(libs.play.services.auth)
   implementation(libs.play.services.ads)
   // implementation(libs.accompanist.permissions)

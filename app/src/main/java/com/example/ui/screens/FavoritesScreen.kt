@@ -33,7 +33,7 @@ fun FavoritesScreen(
 
     Scaffold(
         modifier = modifier.fillMaxSize(),
-        containerColor = MidnightBlack
+        containerColor = MaterialTheme.colorScheme.background
     ) { innerPadding ->
         Column(
             modifier = Modifier
@@ -60,21 +60,21 @@ fun FavoritesScreen(
                         Icon(
                             imageVector = Icons.Default.Favorite,
                             contentDescription = "Empty Favorites",
-                            tint = DeepBlueBorder,
+                            tint = MaterialTheme.colorScheme.outline,
                             modifier = Modifier.size(72.dp)
                         )
                         Spacer(modifier = Modifier.height(16.dp))
                         Text(
                             text = "Collection is Empty",
                             fontSize = 18.sp,
-                            color = IceBlueText,
+                            color = MaterialTheme.colorScheme.onBackground,
                             fontWeight = FontWeight.Bold
                         )
                         Spacer(modifier = Modifier.height(6.dp))
                         Text(
                             text = "Explore the home feed and click the heart icons to assemble your catalog.",
                             fontSize = 14.sp,
-                            color = MutedSlateText,
+                            color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f),
                             textAlign = androidx.compose.ui.text.style.TextAlign.Center
                         )
                     }

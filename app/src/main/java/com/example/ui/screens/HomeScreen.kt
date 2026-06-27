@@ -56,16 +56,16 @@ fun HomeScreen(
 
     Scaffold(
         modifier = modifier.fillMaxSize(),
-        containerColor = MidnightBlack,
+        containerColor = MaterialTheme.colorScheme.background,
         floatingActionButton = {
             if (isAdminMode) {
                 FloatingActionButton(
                     onClick = onNavigateToAdd,
-                    containerColor = PremiumElectricBlue,
-                    contentColor = Color.White,
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    contentColor = MaterialTheme.colorScheme.onPrimary,
                     modifier = Modifier
                         .testTag("admin_add_fab")
-                        .border(1.dp, NeonCyan, FloatingActionButtonDefaults.shape)
+                        .border(1.dp, MaterialTheme.colorScheme.secondary, FloatingActionButtonDefaults.shape)
                 ) {
                     Icon(
                         imageVector = Icons.Default.Add,
@@ -93,14 +93,13 @@ fun HomeScreen(
                 placeholder = "Search wallpapers, creators..."
             )
 
-            // Category scrolling tabs - Only visible and selectable by Administrators
-            if (isAdminMode) {
-                CategorySelector(
-                    categories = viewModel.categories,
-                    selectedCategory = selectedCategory,
-                    onCategorySelected = { viewModel.selectCategory(it) }
-                )
-            }
+            // Dynamic Category tabs
+            val categoriesList by viewModel.categoriesState.collectAsStateWithLifecycle()
+            CategorySelector(
+                categories = categoriesList,
+                selectedCategory = selectedCategory,
+                onCategorySelected = { viewModel.selectCategory(it) }
+            )
 
             if (wallpapers.isEmpty()) {
                 Box(
@@ -113,14 +112,14 @@ fun HomeScreen(
                         Text(
                             text = "No Wallpapers Found",
                             fontSize = 18.sp,
-                            color = IceBlueText,
+                            color = MaterialTheme.colorScheme.onBackground,
                             fontWeight = FontWeight.Bold
                         )
                         Spacer(modifier = Modifier.height(6.dp))
                         Text(
                             text = "Try clearing search or upload new ones as Admin",
                             fontSize = 14.sp,
-                            color = MutedSlateText
+                            color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f)
                         )
                     }
                 }
@@ -159,7 +158,7 @@ fun HomeScreen(
                 text = {
                     Text(
                         "Are you sure you want to permanently delete '${wallpaper.title}' from the gallery database?",
-                        color = IceBlueText
+                        color = MaterialTheme.colorScheme.onSurface
                     )
                 },
                 confirmButton = {
@@ -175,12 +174,12 @@ fun HomeScreen(
                 },
                 dismissButton = {
                     TextButton(onClick = { showDeleteConfirmDialog = null }) {
-                        Text("CANCEL", color = IceBlueText)
+                        Text("CANCEL", color = MaterialTheme.colorScheme.onSurface)
                     }
                 },
-                containerColor = DeepMidnightBlue,
-                textContentColor = IceBlueText,
-                modifier = Modifier.border(1.dp, DeepBlueBorder, RoundedCornerShape(28.dp))
+                containerColor = MaterialTheme.colorScheme.surface,
+                textContentColor = MaterialTheme.colorScheme.onSurface,
+                modifier = Modifier.border(1.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(28.dp))
             )
         }
     }
@@ -200,7 +199,7 @@ fun WallpaperCard(
             .fillMaxWidth()
             .height(260.dp)
             .clip(RoundedCornerShape(20.dp))
-            .border(1.dp, DeepBlueBorder, RoundedCornerShape(20.dp))
+            .border(1.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(20.dp))
             .combinedClickable(
                 onClick = onClick,
                 onLongClick = onLongClick
@@ -237,15 +236,6 @@ fun WallpaperCard(
                 .fillMaxWidth()
                 .padding(12.dp)
         ) {
-            Text(
-                text = wallpaper.title,
-                color = Color.White,
-                fontSize = 15.sp,
-                fontWeight = FontWeight.Bold,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
-            Spacer(modifier = Modifier.height(2.dp))
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -253,9 +243,9 @@ fun WallpaperCard(
             ) {
                 Text(
                     text = "by ${wallpaper.author}",
-                    color = NeonCyan,
-                    fontSize = 11.sp,
-                    fontWeight = FontWeight.Medium,
+                    color = MaterialTheme.colorScheme.secondary,
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.Bold,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                     modifier = Modifier.weight(1f)
@@ -270,35 +260,12 @@ fun WallpaperCard(
                     Icon(
                         imageVector = if (wallpaper.isFavorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
                         contentDescription = "Toggle favorite status",
-                        tint = if (wallpaper.isFavorite) Color.Red else IceBlueText,
+                        tint = if (wallpaper.isFavorite) Color.Red else MaterialTheme.colorScheme.onSurface,
                         modifier = Modifier.size(18.dp)
                     )
                 }
             }
         }
 
-        // Custom marker badging
-        Row(
-            modifier = Modifier
-                .align(Alignment.TopStart)
-                .padding(10.dp),
-            horizontalArrangement = Arrangement.spacedBy(6.dp)
-        ) {
-            if (isAdmin) {
-                Box(
-                    modifier = Modifier
-                        .clip(RoundedCornerShape(8.dp))
-                        .background(DeepMidnightBlue.copy(alpha = 0.8f))
-                        .padding(horizontal = 8.dp, vertical = 4.dp)
-                ) {
-                    Text(
-                        text = wallpaper.category,
-                        color = IceBlueText,
-                        fontSize = 9.sp,
-                        fontWeight = FontWeight.Bold
-                    )
-                }
-            }
-        }
     }
 }

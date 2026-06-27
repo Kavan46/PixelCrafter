@@ -55,7 +55,6 @@ fun SettingsScreen(
 
     // Expansion card states for clean simple UI
     var isAccountExpanded by remember { mutableStateOf(false) }
-    var isCategoryExpanded by remember { mutableStateOf(false) }
     var isThemeExpanded by remember { mutableStateOf(false) }
     var isDetailsExpanded by remember { mutableStateOf(false) }
 
@@ -371,52 +370,7 @@ fun SettingsScreen(
                 }
             }
 
-            // CATEGORY EXPANDABLE CARD
-            item {
-                ExpandableSettingsCard(
-                    title = "Category",
-                    subtitle = "Wallpaper inventory overview by tags",
-                    icon = Icons.Default.Category,
-                    iconColor = MaterialTheme.colorScheme.secondary,
-                    expanded = isCategoryExpanded,
-                    onToggle = { isCategoryExpanded = !isCategoryExpanded }
-                ) {
-                    Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                        viewModel.categories.filter { it != "All" }.forEach { category ->
-                            val count = wallpapers.count { it.category.equals(category, ignoreCase = true) }
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .clip(RoundedCornerShape(10.dp))
-                                    .background(MaterialTheme.colorScheme.background)
-                                    .padding(horizontal = 14.dp, vertical = 10.dp),
-                                horizontalArrangement = Arrangement.SpaceBetween,
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Text(
-                                    text = category,
-                                    color = MaterialTheme.colorScheme.onSurface,
-                                    fontSize = 13.sp,
-                                    fontWeight = FontWeight.Medium
-                                )
-                                Box(
-                                    modifier = Modifier
-                                        .clip(RoundedCornerShape(6.dp))
-                                        .background(MaterialTheme.colorScheme.surfaceVariant)
-                                        .padding(horizontal = 8.dp, vertical = 2.dp)
-                                ) {
-                                    Text(
-                                        text = "$count Items",
-                                        color = MaterialTheme.colorScheme.primary,
-                                        fontSize = 10.sp,
-                                        fontWeight = FontWeight.Bold
-                                    )
-                                }
-                            }
-                        }
-                    }
-                }
-            }
+
 
             // THEMES EXPANDABLE CARD
             item {

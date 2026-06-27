@@ -62,6 +62,7 @@ class WallpaperViewModel(application: Application) : AndroidViewModel(applicatio
     // Real Firebase Authentication Service
     val authService = com.example.data.FirebaseAuthService(application)
     val firebaseDbService = com.example.data.FirebaseDatabaseService(application, repository, viewModelScope)
+    val firebaseFirestoreService = com.example.data.FirebaseFirestoreService(application, repository, viewModelScope)
 
     private val _authError = MutableStateFlow<String?>(null)
     val authError: StateFlow<String?> = _authError.asStateFlow()
@@ -74,6 +75,9 @@ class WallpaperViewModel(application: Application) : AndroidViewModel(applicatio
                     accountName.value = firebaseUser.displayName ?: "PixelCrafter Member"
                     isGoogleConnected.value = firebaseUser.providerData.any { it.providerId == "google.com" }
                     isEmailPasswordSetup.value = firebaseUser.providerData.any { it.providerId == "password" }
+                    if (firebaseFirestoreService.isFirebaseInitialized) {
+                        firebaseFirestoreService.startSyncingFavorites(firebaseUser.uid)
+                    }
                 } else {
                     // Reset if signed out from Firebase
                     accountName.value = "Guest Creator"
@@ -195,46 +199,58 @@ class WallpaperViewModel(application: Application) : AndroidViewModel(applicatio
         Toast.makeText(getApplication(), "Logged in successfully!", Toast.LENGTH_SHORT).show()
     }
 
-    // Master categories list with dynamic support for secure Admin Panel management
-    private val _categoriesState = MutableStateFlow(listOf(
-        "All",
-        "Cyberpunk Neon",
-        "Mystic Nature",
-        "Dark Minimalist",
-        "Cosmic Space",
-        "Futuristic City"
-    ))
-    val categoriesState: StateFlow<List<String>> = _categoriesState.asStateFlow()
+    // Dynamic user-created categories state flow to supplement DB-derived categories
+    private val _customCategories = MutableStateFlow<List<String>>(emptyList())
+
+    // Master categories list derived dynamically from database wallpapers and newly uploaded categories
+    val categoriesState: StateFlow<List<String>> = combine(
+        repository.allWallpapers,
+        _customCategories,
+        firebaseFirestoreService.customCategories
+    ) { all, custom, customFirestore ->
+        val dynamicCategories = all.map { it.category }.distinct().filter { it.isNotBlank() && !it.equals("All", ignoreCase = true) }
+        (listOf("All") + dynamicCategories + custom + customFirestore).distinct()
+    }.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.Eagerly,
+        initialValue = listOf("All")
+    )
 
     val categories: List<String>
-        get() = _categoriesState.value
+        get() = categoriesState.value
 
     fun addCategory(category: String): Boolean {
         val trimmed = category.trim()
         if (trimmed.isBlank()) return false
-        val current = _categoriesState.value
         // Avoid duplicate additions
-        if (current.any { it.equals(trimmed, ignoreCase = true) }) return false
+        if (categoriesState.value.any { it.equals(trimmed, ignoreCase = true) }) return false
         
-        _categoriesState.value = current + trimmed
+        if (firebaseFirestoreService.isFirebaseInitialized) {
+            firebaseFirestoreService.uploadCategory(trimmed)
+        } else {
+            _customCategories.value = _customCategories.value + trimmed
+        }
         return true
     }
 
     fun removeCategory(category: String): Boolean {
         // Protect "All" category from being deleted
         if (category.equals("All", ignoreCase = true)) return false
-        val current = _categoriesState.value
-        if (!current.contains(category)) return false
         
-        _categoriesState.value = current.filter { it != category }
+        if (firebaseFirestoreService.isFirebaseInitialized) {
+            firebaseFirestoreService.deleteCategoryFromFirestore(category)
+        } else {
+            _customCategories.value = _customCategories.value.filter { !it.equals(category, ignoreCase = true) }
+        }
+        
         // If current selected category was the one deleted, fall back to "All"
-        if (_selectedCategory.value == category) {
+        if (_selectedCategory.value.equals(category, ignoreCase = true)) {
             _selectedCategory.value = "All"
         }
         return true
     }
 
-    // Reactive Wallpapers Feed
+    // Reactive Wallpapers Feed with enhanced search filtering by category and metadata
     val wallpapers: StateFlow<List<Wallpaper>> = combine(
         repository.allWallpapers,
         _selectedCategory,
@@ -247,7 +263,11 @@ class WallpaperViewModel(application: Application) : AndroidViewModel(applicatio
         if (query.isNotBlank()) {
             list = list.filter {
                 it.title.contains(query, ignoreCase = true) ||
-                        it.author.contains(query, ignoreCase = true)
+                        it.author.contains(query, ignoreCase = true) ||
+                        it.category.contains(query, ignoreCase = true) ||
+                        it.id.toString().contains(query) ||
+                        (it.isCustom && "custom".contains(query, ignoreCase = true)) ||
+                        (it.isFavorite && "favorite".contains(query, ignoreCase = true))
             }
         }
         list
@@ -282,15 +302,24 @@ class WallpaperViewModel(application: Application) : AndroidViewModel(applicatio
 
     fun toggleFavorite(wallpaper: Wallpaper) {
         viewModelScope.launch {
-            repository.toggleFavorite(wallpaper.id, !wallpaper.isFavorite)
+            val newFavStatus = !wallpaper.isFavorite
+            repository.toggleFavorite(wallpaper.id, newFavStatus)
+            if (firebaseFirestoreService.isFirebaseInitialized) {
+                val userId = authService.currentUser?.uid ?: "anonymous"
+                if (newFavStatus) {
+                    firebaseFirestoreService.uploadFavorite(userId, wallpaper.id)
+                } else {
+                    firebaseFirestoreService.removeFavorite(userId, wallpaper.id)
+                }
+            }
         }
     }
 
     fun deleteWallpaper(wallpaper: Wallpaper) {
         viewModelScope.launch {
             repository.deleteWallpaper(wallpaper)
-            if (firebaseDbService.isFirebaseInitialized) {
-                firebaseDbService.deleteWallpaperFromFirebase(wallpaper.id)
+            if (firebaseFirestoreService.isFirebaseInitialized) {
+                firebaseFirestoreService.deleteWallpaperFromFirebase(wallpaper.id)
             }
         }
     }
@@ -298,8 +327,8 @@ class WallpaperViewModel(application: Application) : AndroidViewModel(applicatio
     fun updateWallpaper(wallpaper: Wallpaper) {
         viewModelScope.launch {
             repository.updateWallpaper(wallpaper)
-            if (firebaseDbService.isFirebaseInitialized) {
-                firebaseDbService.uploadWallpaper(wallpaper)
+            if (firebaseFirestoreService.isFirebaseInitialized) {
+                firebaseFirestoreService.uploadWallpaper(wallpaper)
             }
         }
     }
@@ -326,9 +355,12 @@ class WallpaperViewModel(application: Application) : AndroidViewModel(applicatio
                     isCustom = true
                 )
                 val generatedId = repository.insertWallpaper(newWallpaper).toInt()
-                if (firebaseDbService.isFirebaseInitialized) {
+                if (firebaseFirestoreService.isFirebaseInitialized) {
                     val finalFirebaseUrl = firebaseSyncUrl ?: url
-                    firebaseDbService.uploadWallpaper(newWallpaper.copy(id = generatedId, imageUrl = finalFirebaseUrl))
+                    val finalWp = newWallpaper.copy(id = generatedId, imageUrl = finalFirebaseUrl)
+                    firebaseFirestoreService.uploadWallpaper(finalWp)
+                    val adminId = authService.currentUser?.uid ?: "admin"
+                    firebaseFirestoreService.uploadToAdminStream(generatedId, title, finalFirebaseUrl, adminId)
                 }
                 _addWallpaperStatus.value = "Success: Wallpaper '$title' was crafted successfully!"
             } catch (e: Exception) {

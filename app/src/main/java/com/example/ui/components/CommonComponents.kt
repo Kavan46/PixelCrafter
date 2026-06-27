@@ -38,7 +38,10 @@ fun PixelCrafterHeader(
             .fillMaxWidth()
             .background(
                 brush = Brush.verticalGradient(
-                    colors = listOf(MidnightBlack, DeepMidnightBlue)
+                    colors = listOf(
+                        MaterialTheme.colorScheme.background,
+                        MaterialTheme.colorScheme.surface
+                    )
                 )
             )
             .padding(horizontal = 20.dp, vertical = 24.dp),
@@ -49,7 +52,7 @@ fun PixelCrafterHeader(
             Text(
                 text = title,
                 fontSize = 28.sp,
-                color = Color.White,
+                color = MaterialTheme.colorScheme.onBackground,
                 fontWeight = FontWeight.Bold,
                 style = MaterialTheme.typography.headlineMedium
             )
@@ -57,7 +60,7 @@ fun PixelCrafterHeader(
             Text(
                 text = subtitle,
                 fontSize = 14.sp,
-                color = NeonCyan,
+                color = MaterialTheme.colorScheme.secondary,
                 fontWeight = FontWeight.Medium,
                 style = MaterialTheme.typography.bodyMedium
             )
@@ -81,7 +84,7 @@ fun PixelCrafterSearchBar(
         placeholder = {
             Text(
                 text = placeholder,
-                color = MutedSlateText,
+                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
                 fontSize = 15.sp
             )
         },
@@ -89,7 +92,7 @@ fun PixelCrafterSearchBar(
             Icon(
                 imageVector = Icons.Default.Search,
                 contentDescription = "Search icon",
-                tint = NeonCyan
+                tint = MaterialTheme.colorScheme.secondary
             )
         },
         trailingIcon = {
@@ -98,20 +101,20 @@ fun PixelCrafterSearchBar(
                     Icon(
                         imageVector = Icons.Default.Close,
                         contentDescription = "Clear Search",
-                        tint = MutedSlateText
+                        tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
                     )
                 }
             }
         },
         colors = TextFieldDefaults.colors(
-            focusedContainerColor = SlateNavy,
-            unfocusedContainerColor = DeepMidnightBlue,
-            disabledContainerColor = DeepMidnightBlue,
-            focusedTextColor = IceBlueText,
-            unfocusedTextColor = IceBlueText,
-            cursorColor = NeonCyan,
-            focusedIndicatorColor = PremiumElectricBlue,
-            unfocusedIndicatorColor = DeepBlueBorder
+            focusedContainerColor = MaterialTheme.colorScheme.tertiary,
+            unfocusedContainerColor = MaterialTheme.colorScheme.surface,
+            disabledContainerColor = MaterialTheme.colorScheme.surface,
+            focusedTextColor = MaterialTheme.colorScheme.onSurface,
+            unfocusedTextColor = MaterialTheme.colorScheme.onSurface,
+            cursorColor = MaterialTheme.colorScheme.secondary,
+            focusedIndicatorColor = MaterialTheme.colorScheme.primary,
+            unfocusedIndicatorColor = MaterialTheme.colorScheme.outline
         ),
         shape = RoundedCornerShape(16.dp),
         singleLine = true,
@@ -120,7 +123,7 @@ fun PixelCrafterSearchBar(
             .fillMaxWidth()
             .padding(horizontal = 16.dp)
             .shadow(4.dp, RoundedCornerShape(16.dp))
-            .border(1.dp, DeepBlueBorder, RoundedCornerShape(16.dp))
+            .border(1.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(16.dp))
             .testTag("search_bar_input")
     )
 }
@@ -139,11 +142,11 @@ fun CategorySelector(
         items(categories) { category ->
             val isSelected = category == selectedCategory
             val backgroundGradient = if (isSelected) {
-                Brush.horizontalGradient(listOf(PremiumElectricBlue, ActivePillBlue))
+                Brush.horizontalGradient(listOf(MaterialTheme.colorScheme.primary, MaterialTheme.colorScheme.primary.copy(alpha = 0.8f)))
             } else {
-                Brush.horizontalGradient(listOf(DeepMidnightBlue, DeepMidnightBlue))
+                Brush.horizontalGradient(listOf(MaterialTheme.colorScheme.surface, MaterialTheme.colorScheme.surface))
             }
-            val borderHex = if (isSelected) NeonCyan else DeepBlueBorder
+            val borderHex = if (isSelected) MaterialTheme.colorScheme.secondary else MaterialTheme.colorScheme.outline
 
             Box(
                 modifier = Modifier
@@ -156,7 +159,7 @@ fun CategorySelector(
             ) {
                 Text(
                     text = category,
-                    color = if (isSelected) Color.White else IceBlueText,
+                    color = if (isSelected) Color.White else MaterialTheme.colorScheme.onSurface,
                     fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
                     fontSize = 14.sp
                 )

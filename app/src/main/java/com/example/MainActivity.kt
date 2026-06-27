@@ -84,8 +84,8 @@ fun PixelCrafterApp(viewModel: WallpaperViewModel = androidx.lifecycle.viewmodel
     Scaffold(
         modifier = Modifier
             .fillMaxSize()
-            .background(MidnightBlack),
-        containerColor = MidnightBlack,
+            .background(MaterialTheme.colorScheme.background),
+        containerColor = MaterialTheme.colorScheme.background,
         bottomBar = {
             AnimatedVisibility(
                 visible = isBottomBarVisible,
@@ -93,8 +93,8 @@ fun PixelCrafterApp(viewModel: WallpaperViewModel = androidx.lifecycle.viewmodel
                 exit = slideOutVertically(targetOffsetY = { it })
             ) {
                 NavigationBar(
-                    containerColor = DeepMidnightBlue,
-                    contentColor = IceBlueText,
+                    containerColor = MaterialTheme.colorScheme.surface,
+                    contentColor = MaterialTheme.colorScheme.onSurface,
                     tonalElevation = 8.dp,
                     windowInsets = WindowInsets.navigationBars,
                     modifier = Modifier
@@ -102,7 +102,7 @@ fun PixelCrafterApp(viewModel: WallpaperViewModel = androidx.lifecycle.viewmodel
                         .clip(RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp))
                         .border(
                             width = 1.dp,
-                            color = DeepBlueBorder,
+                            color = MaterialTheme.colorScheme.outline,
                             shape = RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp)
                         )
                         .testTag("app_bottom_nav_bar")
@@ -128,10 +128,10 @@ fun PixelCrafterApp(viewModel: WallpaperViewModel = androidx.lifecycle.viewmodel
                         label = { Text("Discovery", fontSize = 11.sp, fontWeight = androidx.compose.ui.text.font.FontWeight.Medium) },
                         colors = NavigationBarItemDefaults.colors(
                             selectedIconColor = Color.White,
-                            selectedTextColor = NeonCyan,
-                            unselectedIconColor = MutedSlateText,
-                            unselectedTextColor = MutedSlateText,
-                            indicatorColor = ActivePillBlue
+                            selectedTextColor = MaterialTheme.colorScheme.secondary,
+                            unselectedIconColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
+                            unselectedTextColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
+                            indicatorColor = MaterialTheme.colorScheme.primary
                         ),
                         modifier = Modifier.testTag("nav_item_home")
                     )
@@ -157,10 +157,10 @@ fun PixelCrafterApp(viewModel: WallpaperViewModel = androidx.lifecycle.viewmodel
                         label = { Text("Collector", fontSize = 11.sp, fontWeight = androidx.compose.ui.text.font.FontWeight.Medium) },
                         colors = NavigationBarItemDefaults.colors(
                             selectedIconColor = Color.White,
-                            selectedTextColor = NeonCyan,
-                            unselectedIconColor = MutedSlateText,
-                            unselectedTextColor = MutedSlateText,
-                            indicatorColor = ActivePillBlue
+                            selectedTextColor = MaterialTheme.colorScheme.secondary,
+                            unselectedIconColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
+                            unselectedTextColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
+                            indicatorColor = MaterialTheme.colorScheme.primary
                         ),
                         modifier = Modifier.testTag("nav_item_favorite")
                     )
@@ -186,10 +186,10 @@ fun PixelCrafterApp(viewModel: WallpaperViewModel = androidx.lifecycle.viewmodel
                         label = { Text("Studio Hub", fontSize = 11.sp, fontWeight = androidx.compose.ui.text.font.FontWeight.Medium) },
                         colors = NavigationBarItemDefaults.colors(
                             selectedIconColor = Color.White,
-                            selectedTextColor = NeonCyan,
-                            unselectedIconColor = MutedSlateText,
-                            unselectedTextColor = MutedSlateText,
-                            indicatorColor = ActivePillBlue
+                            selectedTextColor = MaterialTheme.colorScheme.secondary,
+                            unselectedIconColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
+                            unselectedTextColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
+                            indicatorColor = MaterialTheme.colorScheme.primary
                         ),
                         modifier = Modifier.testTag("nav_item_settings")
                     )
