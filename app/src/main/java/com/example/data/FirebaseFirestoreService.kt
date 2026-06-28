@@ -46,9 +46,29 @@ class FirebaseFirestoreService(
         }
     }
 
+    private var wallpapersRegistration: com.google.firebase.firestore.ListenerRegistration? = null
+
+    private fun isAdmin(): Boolean {
+        val email = try {
+            com.google.firebase.auth.FirebaseAuth.getInstance().currentUser?.email
+        } catch (e: Exception) {
+            null
+        }
+        return email != null && email.equals("kmatrixstudio@gmail.com", ignoreCase = true)
+    }
+
     init {
-        startSyncingWallpapers()
-        startSyncingCategories()
+        if (isFirebaseInitialized) {
+            try {
+                com.google.firebase.auth.FirebaseAuth.getInstance().addAuthStateListener {
+                    startSyncingWallpapers()
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "Failed to register FirebaseAuth state listener", e)
+                startSyncingWallpapers()
+            }
+            startSyncingCategories()
+        }
     }
 
     /**
@@ -56,72 +76,115 @@ class FirebaseFirestoreService(
      */
     fun startSyncingWallpapers() {
         val fs = firestore ?: return
-        fs.collection("wallpapers")
-            .addSnapshotListener { snapshot, error ->
-                if (error != null) {
-                    Log.e(TAG, "Error listening to wallpapers in Firestore", error)
-                    return@addSnapshotListener
-                }
-                if (snapshot != null) {
-                    scope.launch(Dispatchers.IO) {
-                        try {
-                            for (doc in snapshot.documents) {
-                                val id = doc.getLong("id")?.toInt() ?: 0
-                                val title = doc.getString("title") ?: ""
-                                val category = doc.getString("category") ?: "All"
-                                val imageUrl = doc.getString("imageUrl") ?: ""
-                                val author = doc.getString("author") ?: "Firestore Creator"
-                                val downloads = doc.getLong("downloads")?.toInt() ?: 0
-                                val isCustom = doc.getBoolean("isCustom") ?: true
+        
+        wallpapersRegistration?.remove()
 
-                                if (imageUrl.isNotBlank() && title.isNotBlank() && id > 0) {
+        val isUserAdmin = isAdmin()
+        val query = if (isUserAdmin) {
+            fs.collection("wallpapers")
+        } else {
+            fs.collection("wallpapers").whereEqualTo("isPublic", true)
+        }
+
+        wallpapersRegistration = query.addSnapshotListener { snapshot, error ->
+            if (error != null) {
+                Log.e(TAG, "Error listening to wallpapers in Firestore (isAdmin=$isUserAdmin)", error)
+                return@addSnapshotListener
+            }
+            if (snapshot != null) {
+                scope.launch(Dispatchers.IO) {
+                    try {
+                        for (change in snapshot.documentChanges) {
+                            val doc = change.document
+                            val id = doc.getLong("id")?.toInt() ?: 0
+                            if (id <= 0) continue
+
+                            when (change.type) {
+                                com.google.firebase.firestore.DocumentChange.Type.ADDED,
+                                com.google.firebase.firestore.DocumentChange.Type.MODIFIED -> {
+                                    val title = doc.getString("title") ?: ""
+                                    val category = doc.getString("category") ?: "All"
+                                    val imageUrl = doc.getString("imageUrl") ?: doc.getString("url") ?: ""
+                                    val author = doc.getString("author") ?: "Firestore Creator"
+                                    val downloads = doc.getLong("downloads")?.toInt() ?: 0
+                                    val isCustom = doc.getBoolean("isCustom") ?: true
+
+                                    if (imageUrl.isNotBlank()) {
+                                        val existing = repository.getWallpaperById(id)
+                                        if (existing == null) {
+                                            val newWallpaper = Wallpaper(
+                                                id = id,
+                                                title = title,
+                                                category = category,
+                                                imageUrl = imageUrl,
+                                                author = author,
+                                                downloads = downloads,
+                                                isFavorite = false,
+                                                isCustom = isCustom
+                                            )
+                                            repository.insertWallpaper(newWallpaper)
+                                        } else {
+                                            if (existing.imageUrl != imageUrl || existing.category != category || existing.title != title || existing.author != author) {
+                                                repository.updateWallpaper(existing.copy(
+                                                    title = title,
+                                                    category = category,
+                                                    imageUrl = imageUrl,
+                                                    author = author
+                                                ))
+                                            }
+                                        }
+                                    }
+                                }
+                                com.google.firebase.firestore.DocumentChange.Type.REMOVED -> {
                                     val existing = repository.getWallpaperById(id)
-                                    if (existing == null) {
-                                        val newWallpaper = Wallpaper(
-                                            id = id,
-                                            title = title,
-                                            category = category,
-                                            imageUrl = imageUrl,
-                                            author = author,
-                                            downloads = downloads,
-                                            isFavorite = false,
-                                            isCustom = isCustom
-                                        )
-                                        repository.insertWallpaper(newWallpaper)
+                                    if (existing != null) {
+                                        repository.deleteWallpaper(existing)
                                     }
                                 }
                             }
-                        } catch (e: Exception) {
-                            Log.e(TAG, "Error syncing Firestore wallpapers to local database", e)
                         }
+                    } catch (e: Exception) {
+                        Log.e(TAG, "Error syncing Firestore wallpapers to local database", e)
                     }
                 }
             }
+        }
     }
 
     /**
      * Syncs a single wallpaper metadata mapping to the "wallpapers" collection.
      */
-    fun uploadWallpaper(wallpaper: Wallpaper) {
+    fun uploadWallpaper(wallpaper: Wallpaper, isPublic: Boolean = true) {
         val fs = firestore ?: return
         val targetId = if (wallpaper.id == 0) (System.currentTimeMillis().toInt() and 0xfffffff) else wallpaper.id
         val finalWallpaper = wallpaper.copy(id = targetId)
+
+        val currentUser = try {
+            com.google.firebase.auth.FirebaseAuth.getInstance().currentUser
+        } catch (e: Exception) {
+            null
+        }
+        val uploadedByVal = currentUser?.email ?: currentUser?.uid ?: "admin"
 
         val data = hashMapOf(
             "id" to finalWallpaper.id,
             "title" to finalWallpaper.title,
             "category" to finalWallpaper.category,
             "imageUrl" to finalWallpaper.imageUrl,
+            "url" to finalWallpaper.imageUrl,
             "author" to finalWallpaper.author,
             "downloads" to finalWallpaper.downloads,
             "isCustom" to finalWallpaper.isCustom,
-            "timestamp" to Timestamp.now()
+            "timestamp" to Timestamp.now(),
+            "createdAt" to Timestamp.now(),
+            "uploadedBy" to uploadedByVal,
+            "isPublic" to isPublic
         )
 
         fs.collection("wallpapers").document(targetId.toString())
             .set(data)
             .addOnSuccessListener {
-                Log.d(TAG, "Wallpaper successfully synced to Firestore!")
+                Log.d(TAG, "Wallpaper successfully synced to Firestore with schema keys!")
             }
             .addOnFailureListener { e ->
                 Log.e(TAG, "Failed syncing wallpaper to Firestore", e)

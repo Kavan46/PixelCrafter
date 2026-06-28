@@ -70,6 +70,7 @@ fun AdminAddScreen(
     }
 
     var categoryInput by remember { mutableStateOf("") }
+    var isPublicImage by remember { mutableStateOf(true) }
 
     // Reset status on exit or creation
     DisposableEffect(Unit) {
@@ -84,6 +85,7 @@ fun AdminAddScreen(
             localImagePreviewUri = null
             firebaseSyncBase64 = null
             categoryInput = ""
+            isPublicImage = true
         }
     }
 
@@ -194,7 +196,7 @@ fun AdminAddScreen(
             ) {
                 Text(
                     text = "Aesthetic Category",
-                    color = IceBlueText,
+                    color = MaterialTheme.colorScheme.onSurface,
                     fontSize = 14.sp,
                     fontWeight = FontWeight.Bold
                 )
@@ -202,24 +204,24 @@ fun AdminAddScreen(
                 TextField(
                     value = categoryInput,
                     onValueChange = { categoryInput = it },
-                    placeholder = { Text("e.g. Cars, Heroes, Anime, Nature...", color = MutedSlateText) },
+                    placeholder = { Text("e.g. Cars, Heroes, Anime, Nature...", color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)) },
                     leadingIcon = {
-                        Icon(Icons.Default.Category, contentDescription = null, tint = NeonCyan)
+                        Icon(Icons.Default.Category, contentDescription = null, tint = MaterialTheme.colorScheme.secondary)
                     },
                     colors = TextFieldDefaults.colors(
-                        focusedContainerColor = DeepMidnightBlue,
-                        unfocusedContainerColor = DeepMidnightBlue,
-                        focusedTextColor = IceBlueText,
-                        unfocusedTextColor = IceBlueText,
-                        focusedIndicatorColor = PremiumElectricBlue,
-                        unfocusedIndicatorColor = DeepBlueBorder,
-                        cursorColor = NeonCyan
+                        focusedContainerColor = MaterialTheme.colorScheme.surface,
+                        unfocusedContainerColor = MaterialTheme.colorScheme.surface,
+                        focusedTextColor = MaterialTheme.colorScheme.onSurface,
+                        unfocusedTextColor = MaterialTheme.colorScheme.onSurface,
+                        focusedIndicatorColor = MaterialTheme.colorScheme.primary,
+                        unfocusedIndicatorColor = MaterialTheme.colorScheme.outline,
+                        cursorColor = MaterialTheme.colorScheme.secondary
                     ),
                     shape = RoundedCornerShape(12.dp),
                     singleLine = true,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .border(1.dp, DeepBlueBorder, RoundedCornerShape(12.dp))
+                        .border(1.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(12.dp))
                         .testTag("admin_input_category")
                 )
 
@@ -237,15 +239,15 @@ fun AdminAddScreen(
                         Box(
                             modifier = Modifier
                                 .clip(RoundedCornerShape(8.dp))
-                                .background(if (isSelected) ActivePillBlue else SlateNavy.copy(alpha = 0.5f))
-                                .border(1.dp, if (isSelected) NeonCyan else DeepBlueBorder, RoundedCornerShape(8.dp))
+                                .background(if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.tertiary.copy(alpha = 0.5f))
+                                .border(1.dp, if (isSelected) MaterialTheme.colorScheme.secondary else MaterialTheme.colorScheme.outline, RoundedCornerShape(8.dp))
                                 .clickable { categoryInput = tag }
                                 .padding(horizontal = 12.dp, vertical = 6.dp)
                                 .testTag("admin_suggestion_chip_$tag")
                         ) {
                             Text(
                                 text = tag,
-                                color = if (isSelected) Color.White else MutedSlateText,
+                                color = if (isSelected) Color.White else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
                                 fontSize = 11.sp,
                                 fontWeight = FontWeight.Bold
                             )
@@ -261,7 +263,7 @@ fun AdminAddScreen(
             ) {
                 Text(
                     text = "Aesthetic Media Artwork",
-                    color = IceBlueText,
+                    color = MaterialTheme.colorScheme.onSurface,
                     fontSize = 14.sp,
                     fontWeight = FontWeight.Bold
                 )
@@ -272,18 +274,18 @@ fun AdminAddScreen(
                             .fillMaxWidth()
                             .height(180.dp)
                             .clip(RoundedCornerShape(12.dp))
-                            .background(DeepMidnightBlue)
-                            .border(1.dp, DeepBlueBorder, RoundedCornerShape(12.dp)),
+                            .background(MaterialTheme.colorScheme.surface)
+                            .border(1.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(12.dp)),
                         contentAlignment = Alignment.Center
                     ) {
                         Column(
                             horizontalAlignment = Alignment.CenterHorizontally,
                             verticalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
-                            CircularProgressIndicator(color = NeonCyan, modifier = Modifier.size(36.dp))
+                            CircularProgressIndicator(color = MaterialTheme.colorScheme.secondary, modifier = Modifier.size(36.dp))
                             Text(
                                 text = "Adapting Artwork Vector...",
-                                color = IceBlueText,
+                                color = MaterialTheme.colorScheme.onSurface,
                                 fontSize = 13.sp,
                                 fontWeight = FontWeight.Medium
                             )
@@ -295,7 +297,7 @@ fun AdminAddScreen(
                             .fillMaxWidth()
                             .height(220.dp)
                             .clip(RoundedCornerShape(16.dp))
-                            .border(1.dp, NeonCyan, RoundedCornerShape(16.dp))
+                            .border(1.dp, MaterialTheme.colorScheme.secondary, RoundedCornerShape(16.dp))
                             .shadow(6.dp, RoundedCornerShape(16.dp))
                     ) {
                         AsyncImage(
@@ -333,7 +335,7 @@ fun AdminAddScreen(
                                 )
                                 Text(
                                     text = "Resized & cached successfully",
-                                    color = NeonCyan,
+                                    color = MaterialTheme.colorScheme.secondary,
                                     fontSize = 10.sp
                                 )
                             }
@@ -374,10 +376,10 @@ fun AdminAddScreen(
                             .fillMaxWidth()
                             .height(140.dp)
                             .clip(RoundedCornerShape(14.dp))
-                            .background(DeepMidnightBlue)
+                            .background(MaterialTheme.colorScheme.surface)
                             .border(
                                 width = 1.dp,
-                                color = DeepBlueBorder,
+                                color = MaterialTheme.colorScheme.outline,
                                 shape = RoundedCornerShape(14.dp)
                             )
                             .clickable { galleryLauncher.launch("image/*") }
@@ -392,19 +394,19 @@ fun AdminAddScreen(
                             Icon(
                                 imageVector = Icons.Default.Category,
                                 contentDescription = "Select Artwork",
-                                tint = NeonCyan,
+                                tint = MaterialTheme.colorScheme.secondary,
                                 modifier = Modifier.size(32.dp)
                             )
                             Text(
                                 text = "TAP TO SELECT LOCAL IMAGE FROM DEVICE",
-                                color = IceBlueText,
+                                color = MaterialTheme.colorScheme.onSurface,
                                 fontSize = 12.sp,
                                 fontWeight = FontWeight.Bold,
                                 letterSpacing = 0.5.sp
                             )
                             Text(
                                 text = "Compiles direct photos simple & offline-ready",
-                                color = MutedSlateText,
+                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
                                 fontSize = 10.sp
                             )
                         }
@@ -413,6 +415,53 @@ fun AdminAddScreen(
             }
 
             Spacer(modifier = Modifier.height(12.dp))
+
+            // Field Form 2.8: Visibility / Public Access Toggle
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .border(1.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(12.dp)),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+                shape = RoundedCornerShape(12.dp)
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(
+                            text = "Public Gallery Visibility",
+                            color = MaterialTheme.colorScheme.onSurface,
+                            fontSize = 14.sp,
+                            fontWeight = FontWeight.Bold
+                        )
+                        Spacer(modifier = Modifier.height(2.dp))
+                        Text(
+                            text = "If enabled, this image will immediately show up in the main feed for all users.",
+                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+                            fontSize = 11.sp,
+                            lineHeight = 14.sp
+                        )
+                    }
+                    Spacer(modifier = Modifier.width(16.dp))
+                    Switch(
+                        checked = isPublicImage,
+                        onCheckedChange = { isPublicImage = it },
+                        colors = SwitchDefaults.colors(
+                            checkedThumbColor = MaterialTheme.colorScheme.secondary,
+                            checkedTrackColor = MaterialTheme.colorScheme.primary,
+                            uncheckedThumbColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+                            uncheckedTrackColor = MaterialTheme.colorScheme.tertiary
+                        ),
+                        modifier = Modifier.testTag("admin_visibility_switch")
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
 
             // CRAFT MASTERPIECE Submit Trigger
             Button(
@@ -431,7 +480,8 @@ fun AdminAddScreen(
                         category = finalCategory,
                         url = localImagePreviewUri!!,
                         author = "PixelCrafter Admin",
-                        firebaseSyncUrl = firebaseSyncBase64
+                        firebaseSyncUrl = firebaseSyncBase64,
+                        isPublic = isPublicImage
                     )
                 },
                 colors = ButtonDefaults.buttonColors(
@@ -472,7 +522,7 @@ fun AdminFormField(
     ) {
         Text(
             text = label,
-            color = IceBlueText,
+            color = MaterialTheme.colorScheme.onSurface,
             fontSize = 14.sp,
             fontWeight = FontWeight.Bold
         )
@@ -480,24 +530,24 @@ fun AdminFormField(
         TextField(
             value = value,
             onValueChange = onValueChange,
-            placeholder = { Text(placeholder, color = MutedSlateText) },
+            placeholder = { Text(placeholder, color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)) },
             leadingIcon = {
-                Icon(icon, contentDescription = null, tint = NeonCyan)
+                Icon(icon, contentDescription = null, tint = MaterialTheme.colorScheme.secondary)
             },
             colors = TextFieldDefaults.colors(
-                focusedContainerColor = DeepMidnightBlue,
-                unfocusedContainerColor = DeepMidnightBlue,
-                focusedTextColor = IceBlueText,
-                unfocusedTextColor = IceBlueText,
-                focusedIndicatorColor = PremiumElectricBlue,
-                unfocusedIndicatorColor = DeepBlueBorder,
-                cursorColor = NeonCyan
+                focusedContainerColor = MaterialTheme.colorScheme.surface,
+                unfocusedContainerColor = MaterialTheme.colorScheme.surface,
+                focusedTextColor = MaterialTheme.colorScheme.onSurface,
+                unfocusedTextColor = MaterialTheme.colorScheme.onSurface,
+                focusedIndicatorColor = MaterialTheme.colorScheme.primary,
+                unfocusedIndicatorColor = MaterialTheme.colorScheme.outline,
+                cursorColor = MaterialTheme.colorScheme.secondary
             ),
             shape = RoundedCornerShape(12.dp),
             singleLine = true,
             modifier = Modifier
                 .fillMaxWidth()
-                .border(1.dp, DeepBlueBorder, RoundedCornerShape(12.dp))
+                .border(1.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(12.dp))
                 .testTag(tag)
         )
     }

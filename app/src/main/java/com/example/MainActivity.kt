@@ -40,11 +40,6 @@ import com.google.android.gms.ads.MobileAds
 import com.example.data.AdMobManager
 
 class MainActivity : ComponentActivity() {
-    override fun getAttributionTag(): String? {
-        // Return a declared attribution tag to satisfy AppOps context auditing on Android 12+
-        return "attributionTag"
-    }
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         

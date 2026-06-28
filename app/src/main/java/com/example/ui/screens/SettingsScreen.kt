@@ -155,7 +155,7 @@ fun SettingsScreen(
                             .fillMaxWidth()
                             .clip(RoundedCornerShape(20.dp))
                             .clickable { onNavigateToAdminDashboard() }
-                            .border(1.dp, NeonCyan.copy(alpha = 0.4f), RoundedCornerShape(20.dp)),
+                            .border(1.dp, MaterialTheme.colorScheme.secondary.copy(alpha = 0.4f), RoundedCornerShape(20.dp)),
                         colors = CardDefaults.cardColors(
                             containerColor = MaterialTheme.colorScheme.surface
                         )
@@ -173,13 +173,13 @@ fun SettingsScreen(
                                     modifier = Modifier
                                         .size(40.dp)
                                         .clip(RoundedCornerShape(10.dp))
-                                        .background(NeonCyan.copy(alpha = 0.15f)),
+                                        .background(MaterialTheme.colorScheme.secondary.copy(alpha = 0.15f)),
                                     contentAlignment = Alignment.Center
                                 ) {
                                     Icon(
                                         imageVector = Icons.Default.AdminPanelSettings,
                                         contentDescription = "Admin Area",
-                                        tint = NeonCyan,
+                                        tint = MaterialTheme.colorScheme.secondary,
                                         modifier = Modifier.size(20.dp)
                                     )
                                 }
@@ -192,7 +192,7 @@ fun SettingsScreen(
                                     )
                                     Text(
                                         text = "Manage wallpapers, categories & logs",
-                                        color = NeonCyan,
+                                        color = MaterialTheme.colorScheme.secondary,
                                         fontSize = 11.sp,
                                         fontWeight = FontWeight.Medium
                                     )
@@ -201,7 +201,7 @@ fun SettingsScreen(
                             Icon(
                                 imageVector = Icons.Default.ArrowForward,
                                 contentDescription = "Arrow Forward",
-                                tint = NeonCyan,
+                                tint = MaterialTheme.colorScheme.secondary,
                                 modifier = Modifier.size(18.dp)
                             )
                         }

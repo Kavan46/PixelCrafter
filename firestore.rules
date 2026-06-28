@@ -1,0 +1,38 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Helper function to check if the current user is the administrator
+    function isAdmin() {
+      return request.auth != null && (
+        request.auth.token.email == 'kmatrixstudio@gmail.com' ||
+        request.auth.token.admin == true
+      );
+    }
+
+    // Wallpapers collection rule
+    match /wallpapers/{wallpaperId} {
+      // Users can only read public images, while admins have full read/write access
+      allow read: if isAdmin() || resource.data.isPublic == true;
+      allow write: if isAdmin();
+    }
+
+    // Categories collection rule
+    match /categories/{categoryId} {
+      // Any authenticated user can read categories to populate lists, only admins can write
+      allow read: if request.auth != null;
+      allow write: if isAdmin();
+    }
+
+    // Favorites collection rule (allows users to read and write their own favorites)
+    match /favorites/{favoriteId} {
+      allow read, write: if request.auth != null && request.auth.uid == resource.data.userId;
+      allow create: if request.auth != null && request.auth.uid == request.resource.data.userId;
+    }
+
+    // Admin Uploads tracking collection
+    match /admin_uploads/{uploadId} {
+      allow read, write: if isAdmin();
+    }
+  }
+}

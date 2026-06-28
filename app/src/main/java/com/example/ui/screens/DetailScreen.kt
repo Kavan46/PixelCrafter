@@ -76,13 +76,13 @@ fun DetailScreen(
         Box(
             modifier = modifier
                 .fillMaxSize()
-                .background(MidnightBlack),
+                .background(MaterialTheme.colorScheme.background),
             contentAlignment = Alignment.Center
         ) {
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                CircularProgressIndicator(color = NeonCyan)
+                CircularProgressIndicator(color = MaterialTheme.colorScheme.secondary)
                 Spacer(modifier = Modifier.height(16.dp))
-                Text("Analyzing metadata...", color = IceBlueText)
+                Text("Analyzing metadata...", color = MaterialTheme.colorScheme.onBackground)
             }
         }
         return
@@ -91,7 +91,7 @@ fun DetailScreen(
     Box(
         modifier = modifier
             .fillMaxSize()
-            .background(MidnightBlack)
+            .background(MaterialTheme.colorScheme.background)
     ) {
         // High resolution wallpaper backdrop with cache & smooth crossfade transitions
         AsyncImage(
@@ -149,8 +149,8 @@ fun DetailScreen(
                     onClick = onBack,
                     modifier = Modifier
                         .clip(CircleShape)
-                        .background(DeepMidnightBlue.copy(alpha = 0.7f))
-                        .border(1.dp, DeepBlueBorder, CircleShape)
+                        .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.7f))
+                        .border(1.dp, MaterialTheme.colorScheme.outline, CircleShape)
                         .testTag("detail_back_button")
                 ) {
                     Icon(
@@ -185,13 +185,13 @@ fun DetailScreen(
                     ) {
                         Text(
                             text = "by ${wallpaper.author}",
-                            color = NeonCyan,
+                            color = MaterialTheme.colorScheme.secondary,
                             fontSize = 16.sp,
                             fontWeight = FontWeight.Bold
                         )
                         Text(
                             text = "${wallpaper.downloads} Downloads",
-                            color = MutedSlateText,
+                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
                             fontSize = 13.sp,
                             fontWeight = FontWeight.Medium
                         )
@@ -207,20 +207,20 @@ fun DetailScreen(
                     Button(
                         onClick = { viewModel.toggleFavorite(wallpaper) },
                         colors = ButtonDefaults.buttonColors(
-                            containerColor = DeepMidnightBlue,
-                            contentColor = IceBlueText
+                            containerColor = MaterialTheme.colorScheme.surface,
+                            contentColor = MaterialTheme.colorScheme.onSurface
                         ),
                         shape = RoundedCornerShape(14.dp),
                         modifier = Modifier
                             .weight(1f)
                             .height(56.dp)
-                            .border(1.dp, DeepBlueBorder, RoundedCornerShape(14.dp))
+                            .border(1.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(14.dp))
                             .testTag("detail_favorite_button")
                     ) {
                         Icon(
                             imageVector = if (wallpaper.isFavorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
                             contentDescription = "Favorite status",
-                            tint = if (wallpaper.isFavorite) Color.Red else IceBlueText
+                            tint = if (wallpaper.isFavorite) Color.Red else MaterialTheme.colorScheme.onSurface
                         )
                         Spacer(modifier = Modifier.width(8.dp))
                         Text(if (wallpaper.isFavorite) "Favorited" else "Favorite", fontSize = 14.sp)
@@ -230,14 +230,14 @@ fun DetailScreen(
                     Button(
                         onClick = { viewModel.shareWallpaper(context, wallpaper) },
                         colors = ButtonDefaults.buttonColors(
-                            containerColor = DeepMidnightBlue,
-                            contentColor = IceBlueText
+                            containerColor = MaterialTheme.colorScheme.surface,
+                            contentColor = MaterialTheme.colorScheme.onSurface
                         ),
                         shape = RoundedCornerShape(14.dp),
                         modifier = Modifier
                             .weight(1f)
                             .height(56.dp)
-                            .border(1.dp, DeepBlueBorder, RoundedCornerShape(14.dp))
+                            .border(1.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(14.dp))
                             .testTag("detail_share_button")
                     ) {
                         Icon(
@@ -263,14 +263,14 @@ fun DetailScreen(
                             }
                         },
                         colors = ButtonDefaults.buttonColors(
-                            containerColor = DeepMidnightBlue,
-                            contentColor = IceBlueText
+                            containerColor = MaterialTheme.colorScheme.surface,
+                            contentColor = MaterialTheme.colorScheme.onSurface
                         ),
                         shape = RoundedCornerShape(14.dp),
                         modifier = Modifier
                             .weight(1f)
                             .height(56.dp)
-                            .border(1.dp, DeepBlueBorder, RoundedCornerShape(14.dp))
+                            .border(1.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(14.dp))
                             .testTag("detail_download_button")
                     ) {
                         Icon(
@@ -291,14 +291,14 @@ fun DetailScreen(
                             }
                         },
                         colors = ButtonDefaults.buttonColors(
-                            containerColor = PremiumElectricBlue,
-                            contentColor = Color.White
+                            containerColor = MaterialTheme.colorScheme.primary,
+                            contentColor = MaterialTheme.colorScheme.onPrimary
                         ),
                         shape = RoundedCornerShape(14.dp),
                         modifier = Modifier
                             .weight(1.2f)
                             .height(56.dp)
-                            .border(1.dp, NeonCyan, RoundedCornerShape(14.dp))
+                            .border(1.dp, MaterialTheme.colorScheme.secondary, RoundedCornerShape(14.dp))
                             .testTag("detail_apply_button")
                     ) {
                         Icon(
@@ -319,20 +319,20 @@ fun DetailScreen(
                         Button(
                             onClick = { showEditDialog = true },
                             colors = ButtonDefaults.buttonColors(
-                                containerColor = SlateNavy,
+                                containerColor = MaterialTheme.colorScheme.tertiary,
                                 contentColor = Color.White
                             ),
                             shape = RoundedCornerShape(14.dp),
                             modifier = Modifier
                                 .weight(1f)
                                 .height(50.dp)
-                                .border(1.dp, NeonCyan.copy(alpha = 0.6f), RoundedCornerShape(14.dp))
+                                .border(1.dp, MaterialTheme.colorScheme.secondary.copy(alpha = 0.6f), RoundedCornerShape(14.dp))
                                 .testTag("admin_edit_wallpaper_btn")
                         ) {
                             Icon(
                                 imageVector = Icons.Default.Edit,
                                 contentDescription = "Edit wallpaper details",
-                                tint = NeonCyan,
+                                tint = MaterialTheme.colorScheme.secondary,
                                 modifier = Modifier.size(18.dp)
                             )
                             Spacer(modifier = Modifier.width(8.dp))
@@ -376,11 +376,11 @@ fun DetailScreen(
             Box(
                 modifier = Modifier
                     .fillMaxSize()
-                    .background(MidnightBlack.copy(alpha = 0.85f)),
+                    .background(MaterialTheme.colorScheme.background.copy(alpha = 0.85f)),
                 contentAlignment = Alignment.Center
             ) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    CircularProgressIndicator(color = NeonCyan)
+                    CircularProgressIndicator(color = MaterialTheme.colorScheme.secondary)
                     Spacer(modifier = Modifier.height(16.dp))
                     Text(
                         "Applying canvas parameters...",
@@ -391,7 +391,7 @@ fun DetailScreen(
                     Spacer(modifier = Modifier.height(4.dp))
                     Text(
                         "Downloading maximum quality stream",
-                        color = MutedSlateText,
+                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
                         fontSize = 12.sp
                     )
                 }
@@ -413,7 +413,7 @@ fun DetailScreen(
                                 viewModel.setWallpaper(context, wallpaper, home = true, lock = false)
                                 showSetWallpaperDialog = false
                             },
-                            colors = ButtonDefaults.buttonColors(containerColor = SlateNavy, contentColor = Color.White),
+                            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.tertiary, contentColor = Color.White),
                             modifier = Modifier.fillMaxWidth().height(48.dp)
                         ) {
                             Text("Set on Home Screen")
@@ -423,7 +423,7 @@ fun DetailScreen(
                                 viewModel.setWallpaper(context, wallpaper, home = false, lock = true)
                                 showSetWallpaperDialog = false
                             },
-                            colors = ButtonDefaults.buttonColors(containerColor = SlateNavy, contentColor = Color.White),
+                            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.tertiary, contentColor = Color.White),
                             modifier = Modifier.fillMaxWidth().height(48.dp)
                         ) {
                             Text("Set on Lock Screen")
@@ -433,7 +433,7 @@ fun DetailScreen(
                                 viewModel.setWallpaper(context, wallpaper, home = true, lock = true)
                                 showSetWallpaperDialog = false
                             },
-                            colors = ButtonDefaults.buttonColors(containerColor = PremiumElectricBlue, contentColor = Color.White),
+                            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary, contentColor = Color.White),
                             modifier = Modifier.fillMaxWidth().height(48.dp)
                         ) {
                             Text("Set on Both System Spaces")
@@ -443,11 +443,11 @@ fun DetailScreen(
                 confirmButton = {},
                 dismissButton = {
                     TextButton(onClick = { showSetWallpaperDialog = false }) {
-                        Text("CANCEL", color = IceBlueText)
+                        Text("CANCEL", color = MaterialTheme.colorScheme.onSurface)
                     }
                 },
-                containerColor = DeepMidnightBlue,
-                modifier = Modifier.border(1.dp, DeepBlueBorder, RoundedCornerShape(24.dp))
+                containerColor = MaterialTheme.colorScheme.surface,
+                modifier = Modifier.border(1.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(24.dp))
             )
         }
 
@@ -471,22 +471,22 @@ fun DetailScreen(
                     ) {
                         // Author/Creator Field
                         Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                            Text("Author / Creator", color = NeonCyan, fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                            Text("Author / Creator", color = MaterialTheme.colorScheme.secondary, fontSize = 11.sp, fontWeight = FontWeight.Bold)
                             TextField(
                                 value = editAuthor,
                                 onValueChange = { editAuthor = it },
                                 colors = TextFieldDefaults.colors(
-                                    focusedContainerColor = MidnightBlack,
-                                    unfocusedContainerColor = MidnightBlack,
-                                    focusedTextColor = IceBlueText,
-                                    unfocusedTextColor = IceBlueText,
-                                    focusedIndicatorColor = PremiumElectricBlue,
-                                    unfocusedIndicatorColor = DeepBlueBorder
+                                    focusedContainerColor = MaterialTheme.colorScheme.background,
+                                    unfocusedContainerColor = MaterialTheme.colorScheme.background,
+                                    focusedTextColor = MaterialTheme.colorScheme.onSurface,
+                                    unfocusedTextColor = MaterialTheme.colorScheme.onSurface,
+                                    focusedIndicatorColor = MaterialTheme.colorScheme.primary,
+                                    unfocusedIndicatorColor = MaterialTheme.colorScheme.outline
                                 ),
                                 shape = RoundedCornerShape(8.dp),
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .border(1.dp, DeepBlueBorder, RoundedCornerShape(8.dp))
+                                    .border(1.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(8.dp))
                                     .testTag("edit_author_input")
                             )
                         }
@@ -502,7 +502,7 @@ fun DetailScreen(
                             showEditDialog = false
                             android.widget.Toast.makeText(context, "Wallpaper metadata updated!", android.widget.Toast.LENGTH_SHORT).show()
                         },
-                        colors = ButtonDefaults.buttonColors(containerColor = PremiumElectricBlue),
+                        colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
                         shape = RoundedCornerShape(10.dp),
                         modifier = Modifier.testTag("confirm_edit_button")
                     ) {
@@ -514,11 +514,11 @@ fun DetailScreen(
                         onClick = { showEditDialog = false },
                         modifier = Modifier.testTag("cancel_edit_button")
                     ) {
-                        Text("CANCEL", color = IceBlueText)
+                        Text("CANCEL", color = MaterialTheme.colorScheme.onSurface)
                     }
                 },
-                containerColor = DeepMidnightBlue,
-                modifier = Modifier.border(1.dp, DeepBlueBorder, RoundedCornerShape(24.dp))
+                containerColor = MaterialTheme.colorScheme.surface,
+                modifier = Modifier.border(1.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(24.dp))
             )
         }
 
@@ -536,7 +536,7 @@ fun DetailScreen(
                 text = {
                     Text(
                         "Are you absolutely sure you want to delete this wallpaper? This action is irreversible and will purge it from both local persistence and Firebase Cloud Synchronizers.",
-                        color = MutedSlateText,
+                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
                         fontSize = 13.sp,
                         lineHeight = 18.sp
                     )
@@ -561,11 +561,11 @@ fun DetailScreen(
                         onClick = { showDeleteConfirmDialog = false },
                         modifier = Modifier.testTag("cancel_delete_button")
                     ) {
-                        Text("CANCEL", color = IceBlueText)
+                        Text("CANCEL", color = MaterialTheme.colorScheme.onSurface)
                     }
                 },
-                containerColor = DeepMidnightBlue,
-                modifier = Modifier.border(1.dp, DeepBlueBorder, RoundedCornerShape(24.dp))
+                containerColor = MaterialTheme.colorScheme.surface,
+                modifier = Modifier.border(1.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(24.dp))
             )
         }
     }

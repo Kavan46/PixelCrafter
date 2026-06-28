@@ -334,7 +334,7 @@ class WallpaperViewModel(application: Application) : AndroidViewModel(applicatio
     }
 
     // Add high resolution wallpapers (Admin mode) - Supports local file paths and base64 strings
-    fun addWallpaper(title: String, category: String, url: String, author: String, firebaseSyncUrl: String? = null) {
+    fun addWallpaper(title: String, category: String, url: String, author: String, firebaseSyncUrl: String? = null, isPublic: Boolean = true) {
         if (title.isBlank() || url.isBlank() || category.isBlank()) {
             _addWallpaperStatus.value = "Error: All fields are required to craft."
             return
@@ -358,7 +358,7 @@ class WallpaperViewModel(application: Application) : AndroidViewModel(applicatio
                 if (firebaseFirestoreService.isFirebaseInitialized) {
                     val finalFirebaseUrl = firebaseSyncUrl ?: url
                     val finalWp = newWallpaper.copy(id = generatedId, imageUrl = finalFirebaseUrl)
-                    firebaseFirestoreService.uploadWallpaper(finalWp)
+                    firebaseFirestoreService.uploadWallpaper(finalWp, isPublic = isPublic)
                     val adminId = authService.currentUser?.uid ?: "admin"
                     firebaseFirestoreService.uploadToAdminStream(generatedId, title, finalFirebaseUrl, adminId)
                 }

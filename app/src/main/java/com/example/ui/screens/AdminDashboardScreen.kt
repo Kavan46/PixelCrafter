@@ -53,7 +53,7 @@ fun AdminDashboardScreen(
         Box(
             modifier = modifier
                 .fillMaxSize()
-                .background(MidnightBlack)
+                .background(MaterialTheme.colorScheme.background)
                 .padding(24.dp),
             contentAlignment = Alignment.Center
         ) {
@@ -87,7 +87,7 @@ fun AdminDashboardScreen(
                 
                 Text(
                     text = "The Admin Dashboard is only accessible to authorized developers. Please authentication with an administrator account to continue.",
-                    color = MutedSlateText,
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
                     fontSize = 13.sp,
                     lineHeight = 18.sp,
                     modifier = Modifier.align(Alignment.CenterHorizontally)
@@ -95,7 +95,7 @@ fun AdminDashboardScreen(
 
                 Button(
                     onClick = onBack,
-                    colors = ButtonDefaults.buttonColors(containerColor = SlateNavy),
+                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.tertiary),
                     modifier = Modifier.fillMaxWidth().testTag("unauthorized_admin_back_btn")
                 ) {
                     Text("Go Back", color = Color.White)
@@ -107,7 +107,7 @@ fun AdminDashboardScreen(
 
     Scaffold(
         modifier = modifier.fillMaxSize(),
-        containerColor = MidnightBlack,
+        containerColor = MaterialTheme.colorScheme.background,
         topBar = {
             TopAppBar(
                 title = { Text("Admin Dashboard Hub", color = Color.White, fontWeight = FontWeight.Bold) },
@@ -121,7 +121,7 @@ fun AdminDashboardScreen(
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MidnightBlack,
+                    containerColor = MaterialTheme.colorScheme.background,
                     titleContentColor = Color.White
                 )
             )
@@ -140,23 +140,23 @@ fun AdminDashboardScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .clip(RoundedCornerShape(16.dp))
-                        .background(DeepMidnightBlue)
-                        .border(1.dp, DeepBlueBorder, RoundedCornerShape(16.dp))
+                        .background(MaterialTheme.colorScheme.surface)
+                        .border(1.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(16.dp))
                         .padding(16.dp),
                     horizontalArrangement = Arrangement.SpaceEvenly
                 ) {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Text("Wallpapers", color = MutedSlateText, fontSize = 11.sp, fontWeight = FontWeight.Bold)
-                        Text("${wallpapers.size}", color = NeonCyan, fontSize = 24.sp, fontWeight = FontWeight.Black)
+                        Text("Wallpapers", color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f), fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                        Text("${wallpapers.size}", color = MaterialTheme.colorScheme.secondary, fontSize = 24.sp, fontWeight = FontWeight.Black)
                     }
-                    Box(modifier = Modifier.width(1.dp).height(40.dp).background(DeepBlueBorder))
+                    Box(modifier = Modifier.width(1.dp).height(40.dp).background(MaterialTheme.colorScheme.outline))
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Text("Categories", color = MutedSlateText, fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                        Text("Categories", color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f), fontSize = 11.sp, fontWeight = FontWeight.Bold)
                         Text("${categories.size}", color = Color.White, fontSize = 24.sp, fontWeight = FontWeight.Black)
                     }
-                    Box(modifier = Modifier.width(1.dp).height(40.dp).background(DeepBlueBorder))
+                    Box(modifier = Modifier.width(1.dp).height(40.dp).background(MaterialTheme.colorScheme.outline))
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Text("Favorites", color = MutedSlateText, fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                        Text("Favorites", color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f), fontSize = 11.sp, fontWeight = FontWeight.Bold)
                         Text("${favorites.size}", color = Color(0xFFF43F5E), fontSize = 24.sp, fontWeight = FontWeight.Black)
                     }
                 }
@@ -174,7 +174,7 @@ fun AdminDashboardScreen(
                             .weight(1f)
                             .testTag("admin_quick_add_btn"),
                         colors = ButtonDefaults.buttonColors(
-                            containerColor = PremiumElectricBlue,
+                            containerColor = MaterialTheme.colorScheme.primary,
                             contentColor = Color.White
                         ),
                         shape = RoundedCornerShape(12.dp)
@@ -192,8 +192,8 @@ fun AdminDashboardScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .clip(RoundedCornerShape(20.dp))
-                        .background(DeepMidnightBlue)
-                        .border(1.dp, DeepBlueBorder, RoundedCornerShape(20.dp))
+                        .background(MaterialTheme.colorScheme.surface)
+                        .border(1.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(20.dp))
                         .padding(18.dp)
                 ) {
                     Row(
@@ -203,7 +203,7 @@ fun AdminDashboardScreen(
                         Icon(
                             imageVector = Icons.Default.Category,
                             contentDescription = "Categories Manager",
-                            tint = NeonCyan,
+                            tint = MaterialTheme.colorScheme.secondary,
                             modifier = Modifier.size(20.dp)
                         )
                         Text(
@@ -225,20 +225,20 @@ fun AdminDashboardScreen(
                         TextField(
                             value = newCategoryText,
                             onValueChange = { newCategoryText = it },
-                            placeholder = { Text("E.g. Synthwave", color = MutedSlateText, fontSize = 13.sp) },
+                            placeholder = { Text("E.g. Synthwave", color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f), fontSize = 13.sp) },
                             singleLine = true,
                             colors = TextFieldDefaults.colors(
-                                focusedContainerColor = MidnightBlack,
-                                unfocusedContainerColor = MidnightBlack,
-                                focusedTextColor = IceBlueText,
-                                unfocusedTextColor = IceBlueText,
-                                focusedIndicatorColor = PremiumElectricBlue,
-                                unfocusedIndicatorColor = DeepBlueBorder
+                                focusedContainerColor = MaterialTheme.colorScheme.background,
+                                unfocusedContainerColor = MaterialTheme.colorScheme.background,
+                                focusedTextColor = MaterialTheme.colorScheme.onSurface,
+                                unfocusedTextColor = MaterialTheme.colorScheme.onSurface,
+                                focusedIndicatorColor = MaterialTheme.colorScheme.primary,
+                                unfocusedIndicatorColor = MaterialTheme.colorScheme.outline
                             ),
                             shape = RoundedCornerShape(10.dp),
                             modifier = Modifier
                                 .weight(1f)
-                                .border(1.dp, DeepBlueBorder, RoundedCornerShape(10.dp))
+                                .border(1.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(10.dp))
                                 .testTag("add_category_input")
                         )
 
@@ -252,7 +252,7 @@ fun AdminDashboardScreen(
                                 }
                             },
                             colors = ButtonDefaults.buttonColors(
-                                containerColor = PremiumElectricBlue
+                                containerColor = MaterialTheme.colorScheme.primary
                             ),
                             shape = RoundedCornerShape(10.dp),
                             modifier = Modifier.testTag("add_category_button")
@@ -270,22 +270,22 @@ fun AdminDashboardScreen(
                                 .fillMaxWidth()
                                 .padding(vertical = 5.dp)
                                 .clip(RoundedCornerShape(8.dp))
-                                .background(SlateNavy.copy(alpha = 0.3f))
-                                .border(1.dp, DeepBlueBorder.copy(alpha = 0.5f), RoundedCornerShape(8.dp))
+                                .background(MaterialTheme.colorScheme.tertiary.copy(alpha = 0.3f))
+                                .border(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.5f), RoundedCornerShape(8.dp))
                                 .padding(horizontal = 12.dp, vertical = 6.dp),
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.SpaceBetween
                         ) {
-                            Text(cat, color = IceBlueText, fontSize = 13.sp, fontWeight = FontWeight.Medium)
+                            Text(cat, color = MaterialTheme.colorScheme.onSurface, fontSize = 13.sp, fontWeight = FontWeight.Medium)
 
                             if (cat.equals("All", ignoreCase = true)) {
                                 Box(
                                     modifier = Modifier
                                         .clip(RoundedCornerShape(6.dp))
-                                        .background(DeepBlueBorder)
+                                        .background(MaterialTheme.colorScheme.outline)
                                         .padding(horizontal = 8.dp, vertical = 2.dp)
                                 ) {
-                                    Text("DEFAULT", color = MutedSlateText, fontSize = 9.sp, fontWeight = FontWeight.Bold)
+                                    Text("DEFAULT", color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f), fontSize = 9.sp, fontWeight = FontWeight.Bold)
                                 }
                             } else {
                                 IconButton(
@@ -317,8 +317,8 @@ fun AdminDashboardScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .clip(RoundedCornerShape(20.dp))
-                        .background(DeepMidnightBlue)
-                        .border(1.dp, DeepBlueBorder, RoundedCornerShape(20.dp))
+                        .background(MaterialTheme.colorScheme.surface)
+                        .border(1.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(20.dp))
                         .padding(18.dp)
                 ) {
                     Row(
@@ -328,7 +328,7 @@ fun AdminDashboardScreen(
                         Icon(
                             imageVector = Icons.Default.Share,
                             contentDescription = "Workflow Diagram",
-                            tint = NeonCyan,
+                            tint = MaterialTheme.colorScheme.secondary,
                             modifier = Modifier.size(20.dp)
                         )
                         Text(
@@ -342,7 +342,7 @@ fun AdminDashboardScreen(
                     Spacer(modifier = Modifier.height(6.dp))
                     Text(
                         text = "Interactive system representation of our compression and dual-sync architecture.",
-                        color = MutedSlateText,
+                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
                         fontSize = 11.sp,
                         lineHeight = 15.sp
                     )
@@ -359,15 +359,15 @@ fun AdminDashboardScreen(
                                 modifier = Modifier
                                     .weight(1f)
                                     .clip(RoundedCornerShape(8.dp))
-                                    .background(if (workflowStepSelected == stepNum) ActivePillBlue else SlateNavy.copy(alpha = 0.5f))
-                                    .border(1.dp, if (workflowStepSelected == stepNum) NeonCyan else DeepBlueBorder, RoundedCornerShape(8.dp))
+                                    .background(if (workflowStepSelected == stepNum) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.tertiary.copy(alpha = 0.5f))
+                                    .border(1.dp, if (workflowStepSelected == stepNum) MaterialTheme.colorScheme.secondary else MaterialTheme.colorScheme.outline, RoundedCornerShape(8.dp))
                                     .clickable { workflowStepSelected = stepNum }
                                     .padding(vertical = 8.dp),
                                 contentAlignment = Alignment.Center
                             ) {
                                 Text(
                                     "Step $stepNum",
-                                    color = if (workflowStepSelected == stepNum) Color.White else MutedSlateText,
+                                    color = if (workflowStepSelected == stepNum) Color.White else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
                                     fontSize = 11.sp,
                                     fontWeight = FontWeight.Bold
                                 )
@@ -382,8 +382,8 @@ fun AdminDashboardScreen(
                         modifier = Modifier
                             .fillMaxWidth()
                             .clip(RoundedCornerShape(12.dp))
-                            .background(MidnightBlack)
-                            .border(1.dp, DeepBlueBorder, RoundedCornerShape(12.dp))
+                            .background(MaterialTheme.colorScheme.background)
+                            .border(1.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(12.dp))
                             .padding(14.dp)
                     ) {
                         Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
@@ -394,7 +394,7 @@ fun AdminDashboardScreen(
                                         desc = "Retrieves file paths & content streams locally with absolute Android device storage permissions securely.",
                                         detail = "Input Stream → Copied to app persistent internal workspace directory (/custom_wallpapers). Saved as a local physical JPEG snapshot.",
                                         icon = Icons.Default.FolderOpen,
-                                        tintColor = NeonCyan
+                                        tintColor = MaterialTheme.colorScheme.secondary
                                     )
                                 }
                                 2 -> {
@@ -436,11 +436,11 @@ fun AdminDashboardScreen(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         WorkflowBullet(1, workflowStepSelected == 1)
-                        Spacer(modifier = Modifier.weight(1f).height(2.dp).background(if (workflowStepSelected > 1) NeonCyan else DeepBlueBorder))
+                        Spacer(modifier = Modifier.weight(1f).height(2.dp).background(if (workflowStepSelected > 1) MaterialTheme.colorScheme.secondary else MaterialTheme.colorScheme.outline))
                         WorkflowBullet(2, workflowStepSelected == 2)
-                        Spacer(modifier = Modifier.weight(1f).height(2.dp).background(if (workflowStepSelected > 2) NeonCyan else DeepBlueBorder))
+                        Spacer(modifier = Modifier.weight(1f).height(2.dp).background(if (workflowStepSelected > 2) MaterialTheme.colorScheme.secondary else MaterialTheme.colorScheme.outline))
                         WorkflowBullet(3, workflowStepSelected == 3)
-                        Spacer(modifier = Modifier.weight(1f).height(2.dp).background(if (workflowStepSelected > 3) NeonCyan else DeepBlueBorder))
+                        Spacer(modifier = Modifier.weight(1f).height(2.dp).background(if (workflowStepSelected > 3) MaterialTheme.colorScheme.secondary else MaterialTheme.colorScheme.outline))
                         WorkflowBullet(4, workflowStepSelected == 4)
                     }
                 }
@@ -478,19 +478,19 @@ fun WorkflowDetailStep(
 
         Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
             Text(title, color = tintColor, fontSize = 13.sp, fontWeight = FontWeight.Bold, letterSpacing = 0.5.sp)
-            Text(desc, color = IceBlueText, fontSize = 12.sp, lineHeight = 16.sp, fontWeight = FontWeight.Medium)
+            Text(desc, color = MaterialTheme.colorScheme.onSurface, fontSize = 12.sp, lineHeight = 16.sp, fontWeight = FontWeight.Medium)
             
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(top = 4.dp)
                     .clip(RoundedCornerShape(6.dp))
-                    .background(SlateNavy.copy(alpha = 0.2f))
+                    .background(MaterialTheme.colorScheme.tertiary.copy(alpha = 0.2f))
                     .padding(8.dp)
             ) {
                 Text(
                     text = "SPEC DETAILS: $detail",
-                    color = MutedSlateText,
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
                     fontSize = 10.sp,
                     lineHeight = 13.sp,
                     fontWeight = FontWeight.Bold
@@ -506,13 +506,13 @@ fun WorkflowBullet(num: Int, isActive: Boolean) {
         modifier = Modifier
             .size(24.dp)
             .clip(CircleShape)
-            .background(if (isActive) ActivePillBlue else SlateNavy)
-            .border(1.dp, if (isActive) NeonCyan else DeepBlueBorder, CircleShape),
+            .background(if (isActive) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.tertiary)
+            .border(1.dp, if (isActive) MaterialTheme.colorScheme.secondary else MaterialTheme.colorScheme.outline, CircleShape),
         contentAlignment = Alignment.Center
     ) {
         Text(
             text = "$num",
-            color = if (isActive) Color.White else MutedSlateText,
+            color = if (isActive) Color.White else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
             fontSize = 10.sp,
             fontWeight = FontWeight.Bold
         )
