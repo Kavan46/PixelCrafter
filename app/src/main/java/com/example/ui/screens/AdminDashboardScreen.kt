@@ -399,27 +399,27 @@ fun AdminDashboardScreen(
                                 }
                                 2 -> {
                                     WorkflowDetailStep(
-                                        title = "2. INTELLIGENT COMPRESSION",
-                                        desc = "Scales rendering resolution below 320px constraints using standard Android BitmapFactory downsampling logic.",
-                                        detail = "Avoids Realtime Database buffer overflows. Preserves 100% original aspect ratio using iterative sample powers-of-two.",
+                                        title = "2. HIGH-RES OPTIMIZATION",
+                                        desc = "Prepares the image to be extremely sharp (up to 1080p), preserving crystal-clear pixel density.",
+                                        detail = "Ensures amazing aesthetic look on all screen sizes while keeping document footprint perfectly optimized.",
                                         icon = Icons.Default.SettingsSuggest,
                                         tintColor = Color(0xFFA855F7)
                                     )
                                 }
                                 3 -> {
                                     WorkflowDetailStep(
-                                        title = "3. BASE64 TRANSFORM",
-                                        desc = "Encodes compressed ByteStream into strict high-contrast data:image/jpeg;base64 representation.",
-                                        detail = "Compressed to 75% quality JPEG byte array first, then passed to Android Base64 encoder using NO_WRAP configurations.",
+                                        title = "3. DIRECT FIRESTORE INGESTION",
+                                        desc = "Encodes the high-res optimized byte stream to a robust base64 schema format.",
+                                        detail = "Stores the artwork binary directly in Firestore documents, bypassing external storage and permission rules completely.",
                                         icon = Icons.Default.Settings,
                                         tintColor = Color(0xFFEAB308)
                                     )
                                 }
                                 4 -> {
                                     WorkflowDetailStep(
-                                        title = "4. PERSISTENT HYBRID SYNC",
-                                        desc = "Publishes generated ID details directly into standard Room SQLite Database while publishing base64 vectors.",
-                                        detail = "Local database reads load original uncompressed high-resolution files instantly. Remote connections sync fallback base64 streams live.",
+                                        title = "4. HYBRID REAL-TIME FEED",
+                                        desc = "Saves high-res document metadata with real-time sync listeners for global user gallery access.",
+                                        detail = "Local device loads 100% original uncompressed local copy. Remote users instantly download crystal-clear 1080p cloud artwork.",
                                         icon = Icons.Default.CloudUpload,
                                         tintColor = Color(0xFF22C55E)
                                     )

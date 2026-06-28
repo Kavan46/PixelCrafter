@@ -43,7 +43,8 @@ class FirebaseDatabaseService(
     }
 
     init {
-        startSyncing()
+        // Disabled to favor full-resolution Firestore and Firebase Storage syncing
+        // startSyncing()
     }
 
     fun startSyncing() {

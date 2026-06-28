@@ -19,6 +19,7 @@ import com.example.data.local.WallpaperDatabase
 import com.example.data.model.Wallpaper
 import com.example.data.repository.WallpaperRepository
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -333,7 +334,7 @@ class WallpaperViewModel(application: Application) : AndroidViewModel(applicatio
         }
     }
 
-    // Add high resolution wallpapers (Admin mode) - Supports local file paths and base64 strings
+    // Add high resolution wallpapers (Admin mode) - Stores the uncompressed original locally and uploads high-resolution 1080p artwork directly to Firestore
     fun addWallpaper(title: String, category: String, url: String, author: String, firebaseSyncUrl: String? = null, isPublic: Boolean = true) {
         if (title.isBlank() || url.isBlank() || category.isBlank()) {
             _addWallpaperStatus.value = "Error: All fields are required to craft."
@@ -346,21 +347,28 @@ class WallpaperViewModel(application: Application) : AndroidViewModel(applicatio
 
         viewModelScope.launch {
             try {
+                _addWallpaperStatus.value = "Syncing high-resolution artwork to Firestore..."
+                
+                // Keep the uncompressed original local file for the local SQLite DB representation
+                val localUrl = url
+                // Use the high-resolution Base64 string for remote syncing to Firestore
+                val remoteUrl = firebaseSyncUrl ?: url
+
                 val newWallpaper = Wallpaper(
                     title = title,
                     category = category,
-                    imageUrl = url,
+                    imageUrl = localUrl, // Local DB uses the 100% original uncompressed quality file
                     author = author.ifBlank { "PixelCrafter Admin" },
                     downloads = (100..999).random(),
                     isCustom = true
                 )
                 val generatedId = repository.insertWallpaper(newWallpaper).toInt()
+                
                 if (firebaseFirestoreService.isFirebaseInitialized) {
-                    val finalFirebaseUrl = firebaseSyncUrl ?: url
-                    val finalWp = newWallpaper.copy(id = generatedId, imageUrl = finalFirebaseUrl)
+                    val finalWp = newWallpaper.copy(id = generatedId, imageUrl = remoteUrl)
                     firebaseFirestoreService.uploadWallpaper(finalWp, isPublic = isPublic)
                     val adminId = authService.currentUser?.uid ?: "admin"
-                    firebaseFirestoreService.uploadToAdminStream(generatedId, title, finalFirebaseUrl, adminId)
+                    firebaseFirestoreService.uploadToAdminStream(generatedId, title, remoteUrl, adminId)
                 }
                 _addWallpaperStatus.value = "Success: Wallpaper '$title' was crafted successfully!"
             } catch (e: Exception) {
@@ -369,17 +377,21 @@ class WallpaperViewModel(application: Application) : AndroidViewModel(applicatio
         }
     }
 
-    // Process selected local Uri: copies the image to internal persistent storage and generates a resized Base64 version for syncing.
+    // Process selected local Uri: copies original high-res image directly into internal persistent storage (no compression),
+    // and generates a high-quality 1080p JPEG Base64 representation (crisp quality, safe for Firestore 1MB limits).
     fun processSelectedImage(uri: Uri, callback: (localPath: String, base64String: String?) -> Unit) {
         viewModelScope.launch(Dispatchers.IO) {
             try {
                 val context = getApplication<Application>()
-                // 1. Copy image to a persistent local file
+                val mimeType = context.contentResolver.getType(uri) ?: "image/jpeg"
+                val extension = if (mimeType == "image/png") "png" else "jpg"
+
+                // 1. Copy image to a persistent local file in original quality
                 val customFolder = File(context.filesDir, "custom_wallpapers")
                 if (!customFolder.exists()) {
                     customFolder.mkdirs()
                 }
-                val localFile = File(customFolder, "wp_${System.currentTimeMillis()}.jpg")
+                val localFile = File(customFolder, "wp_${System.currentTimeMillis()}.$extension")
                 context.contentResolver.openInputStream(uri)?.use { input ->
                     FileOutputStream(localFile).use { output ->
                         input.copyTo(output)
@@ -387,7 +399,7 @@ class WallpaperViewModel(application: Application) : AndroidViewModel(applicatio
                 }
                 val localPath = "file://${localFile.absolutePath}"
 
-                // 2. Generate a compact resized jpeg base64 representation for Firebase sync
+                // 2. Generate high-quality 1080p JPEG Base64 representation for Firestore sync
                 var base64Result: String? = null
                 try {
                     context.contentResolver.openInputStream(uri)?.use { input ->
@@ -396,10 +408,12 @@ class WallpaperViewModel(application: Application) : AndroidViewModel(applicatio
                         }
                         android.graphics.BitmapFactory.decodeStream(input, null, options)
                         
-                        // Target about 300px limit for efficient Realtime DB storage
                         var scale = 1
-                        val limit = 320
-                        while (options.outWidth / scale / 2 >= limit || options.outHeight / scale / 2 >= limit) {
+                        val maxTargetDim = 1080
+                        val rawWidth = options.outWidth
+                        val rawHeight = options.outHeight
+                        
+                        while ((rawWidth / scale) > maxTargetDim * 2 || (rawHeight / scale) > maxTargetDim * 2) {
                             scale *= 2
                         }
                         
@@ -410,11 +424,30 @@ class WallpaperViewModel(application: Application) : AndroidViewModel(applicatio
                         context.contentResolver.openInputStream(uri)?.use { nextInput ->
                             val decoded = android.graphics.BitmapFactory.decodeStream(nextInput, null, decodeOptions)
                             if (decoded != null) {
+                                val currentWidth = decoded.width
+                                val currentHeight = decoded.height
+                                val finalBitmap = if (currentWidth > maxTargetDim || currentHeight > maxTargetDim) {
+                                    val ratio = currentWidth.toFloat() / currentHeight.toFloat()
+                                    val (newW, newH) = if (currentWidth > currentHeight) {
+                                        maxTargetDim to (maxTargetDim / ratio).toInt()
+                                    } else {
+                                        (maxTargetDim * ratio).toInt() to maxTargetDim
+                                    }
+                                    Bitmap.createScaledBitmap(decoded, newW, newH, true)
+                                } else {
+                                    decoded
+                                }
+                                
                                 val outStream = java.io.ByteArrayOutputStream()
-                                decoded.compress(Bitmap.CompressFormat.JPEG, 75, outStream)
+                                finalBitmap.compress(Bitmap.CompressFormat.JPEG, 85, outStream)
                                 val byteArray = outStream.toByteArray()
                                 val encoded = android.util.Base64.encodeToString(byteArray, android.util.Base64.NO_WRAP)
                                 base64Result = "data:image/jpeg;base64,$encoded"
+                                
+                                if (finalBitmap != decoded) {
+                                    finalBitmap.recycle()
+                                }
+                                decoded.recycle()
                             }
                         }
                     }

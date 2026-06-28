@@ -37,6 +37,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
 import com.example.data.model.Wallpaper
 import com.example.ui.components.rememberImageModel
 import com.example.ui.components.rememberDetailImageModel
@@ -60,8 +62,25 @@ fun DetailScreen(
     val wallpapers by viewModel.wallpapers.collectAsStateWithLifecycle()
     val operationLoading by viewModel.operationLoading.collectAsStateWithLifecycle()
 
-    val wallpaper = remember(wallpaperId, wallpapers) {
-        wallpapers.find { it.id == wallpaperId }
+    val initialIndex = remember(wallpaperId, wallpapers) {
+        val index = wallpapers.indexOfFirst { it.id == wallpaperId }
+        if (index >= 0) index else 0
+    }
+
+    val pagerState = rememberPagerState(
+        initialPage = initialIndex,
+        pageCount = { wallpapers.size }
+    )
+
+    // Sync pager position when initialIndex changes (e.g., list finishes loading asynchronously)
+    LaunchedEffect(initialIndex) {
+        if (initialIndex in 0 until wallpapers.size) {
+            pagerState.scrollToPage(initialIndex)
+        }
+    }
+
+    val wallpaper = remember(pagerState.currentPage, wallpapers) {
+        wallpapers.getOrNull(pagerState.currentPage) ?: wallpapers.find { it.id == wallpaperId }
     }
 
     var showSetWallpaperDialog by remember { mutableStateOf(false) }
@@ -93,20 +112,28 @@ fun DetailScreen(
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
     ) {
-        // High resolution wallpaper backdrop with cache & smooth crossfade transitions
-        AsyncImage(
-            model = rememberDetailImageModel(wallpaper.imageUrl),
-            contentDescription = "Full render of ${wallpaper.title}",
-            contentScale = ContentScale.Crop,
-            modifier = Modifier
-                .fillMaxSize()
-                .clickable(
-                    interactionSource = remember { MutableInteractionSource() },
-                    indication = null
-                ) {
-                    optionsVisible = !optionsVisible
-                }
-        )
+        // High resolution wallpaper backdrop with cache & horizontal swiping support
+        HorizontalPager(
+            state = pagerState,
+            modifier = Modifier.fillMaxSize()
+        ) { page ->
+            val wp = wallpapers.getOrNull(page)
+            if (wp != null) {
+                AsyncImage(
+                    model = rememberDetailImageModel(wp.imageUrl),
+                    contentDescription = "Full render of ${wp.title}",
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .clickable(
+                            interactionSource = remember { MutableInteractionSource() },
+                            indication = null
+                        ) {
+                            optionsVisible = !optionsVisible
+                        }
+                )
+            }
+        }
 
         // Backdrop gradients to contrast control graphics
         AnimatedVisibility(

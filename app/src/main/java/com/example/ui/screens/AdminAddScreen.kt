@@ -334,7 +334,7 @@ fun AdminAddScreen(
                                     fontWeight = FontWeight.Bold
                                 )
                                 Text(
-                                    text = "Resized & cached successfully",
+                                    text = "Original resolution loaded successfully",
                                     color = MaterialTheme.colorScheme.secondary,
                                     fontSize = 10.sp
                                 )
