@@ -191,7 +191,7 @@ fun rememberImageModel(url: String): Any {
 }
 
 @Composable
-fun rememberCardImageModel(url: String, width: Int = 360, height: Int = 600): Any {
+fun rememberCardImageModel(url: String, width: Int = 540, height: Int = 900): Any {
     val context = androidx.compose.ui.platform.LocalContext.current
     val parsedData = rememberImageModel(url)
     return androidx.compose.runtime.remember(url, parsedData) {

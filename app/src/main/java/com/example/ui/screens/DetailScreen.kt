@@ -29,6 +29,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.graphics.ColorMatrix
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
@@ -90,6 +92,11 @@ fun DetailScreen(
     var showEditDialog by remember { mutableStateOf(false) }
     var showDeleteConfirmDialog by remember { mutableStateOf(false) }
     var optionsVisible by remember { mutableStateOf(true) }
+    var selectedFilter by remember { mutableStateOf(com.example.viewmodel.ImageFilterType.NONE) }
+
+    LaunchedEffect(pagerState.currentPage) {
+        selectedFilter = com.example.viewmodel.ImageFilterType.NONE
+    }
 
     if (wallpaper == null) {
         Box(
@@ -123,6 +130,7 @@ fun DetailScreen(
                     model = rememberDetailImageModel(wp.imageUrl),
                     contentDescription = "Full render of ${wp.title}",
                     contentScale = ContentScale.Crop,
+                    colorFilter = getComposeColorFilter(selectedFilter),
                     modifier = Modifier
                         .fillMaxSize()
                         .clickable(
@@ -225,6 +233,55 @@ fun DetailScreen(
                     }
                 }
 
+                // Visual Art Filters Scrollable Row
+                Column(
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text(
+                        text = "Visual Art Filters",
+                        color = MaterialTheme.colorScheme.secondary,
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier.padding(horizontal = 4.dp)
+                    )
+                    
+                    androidx.compose.foundation.lazy.LazyRow(
+                        horizontalArrangement = Arrangement.spacedBy(10.dp),
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        items(com.example.viewmodel.ImageFilterType.values()) { filterType ->
+                            val isSelected = selectedFilter == filterType
+                            Box(
+                                modifier = Modifier
+                                    .clip(RoundedCornerShape(12.dp))
+                                    .background(
+                                        if (isSelected) MaterialTheme.colorScheme.primary 
+                                        else MaterialTheme.colorScheme.surface.copy(alpha = 0.5f)
+                                    )
+                                    .border(
+                                        1.dp, 
+                                        if (isSelected) MaterialTheme.colorScheme.secondary 
+                                        else MaterialTheme.colorScheme.outline, 
+                                        RoundedCornerShape(12.dp)
+                                    )
+                                    .clickable { selectedFilter = filterType }
+                                    .padding(horizontal = 14.dp, vertical = 10.dp)
+                                    .testTag("filter_chip_${filterType.name}"),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Text(
+                                    text = filterType.displayName,
+                                    color = if (isSelected) MaterialTheme.colorScheme.onPrimary 
+                                            else MaterialTheme.colorScheme.onSurface,
+                                    fontSize = 12.sp,
+                                    fontWeight = FontWeight.Bold
+                                )
+                            }
+                        }
+                    }
+                }
+
                 // Central control strip: Share, Favorite, Download
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -285,7 +342,7 @@ fun DetailScreen(
                         onClick = {
                             AdMobManager.showRewardedAd(context) { isGranted ->
                                 if (isGranted) {
-                                    viewModel.downloadWallpaper(context, wallpaper)
+                                    viewModel.downloadWallpaper(context, wallpaper, selectedFilter)
                                 }
                             }
                         },
@@ -437,7 +494,7 @@ fun DetailScreen(
                     ) {
                         Button(
                             onClick = {
-                                viewModel.setWallpaper(context, wallpaper, home = true, lock = false)
+                                viewModel.setWallpaper(context, wallpaper, home = true, lock = false, filter = selectedFilter)
                                 showSetWallpaperDialog = false
                             },
                             colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.tertiary, contentColor = Color.White),
@@ -447,7 +504,7 @@ fun DetailScreen(
                         }
                         Button(
                             onClick = {
-                                viewModel.setWallpaper(context, wallpaper, home = false, lock = true)
+                                viewModel.setWallpaper(context, wallpaper, home = false, lock = true, filter = selectedFilter)
                                 showSetWallpaperDialog = false
                             },
                             colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.tertiary, contentColor = Color.White),
@@ -457,7 +514,7 @@ fun DetailScreen(
                         }
                         Button(
                             onClick = {
-                                viewModel.setWallpaper(context, wallpaper, home = true, lock = true)
+                                viewModel.setWallpaper(context, wallpaper, home = true, lock = true, filter = selectedFilter)
                                 showSetWallpaperDialog = false
                             },
                             colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary, contentColor = Color.White),
@@ -594,6 +651,55 @@ fun DetailScreen(
                 containerColor = MaterialTheme.colorScheme.surface,
                 modifier = Modifier.border(1.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(24.dp))
             )
+        }
+    }
+}
+
+fun getComposeColorFilter(filter: com.example.viewmodel.ImageFilterType): ColorFilter? {
+    return when (filter) {
+        com.example.viewmodel.ImageFilterType.NONE -> null
+        com.example.viewmodel.ImageFilterType.GRAYSCALE -> {
+            ColorFilter.colorMatrix(ColorMatrix().apply { setToSaturation(0f) })
+        }
+        com.example.viewmodel.ImageFilterType.SEPIA -> {
+            ColorFilter.colorMatrix(ColorMatrix(floatArrayOf(
+                0.393f, 0.769f, 0.189f, 0f, 0f,
+                0.349f, 0.686f, 0.168f, 0f, 0f,
+                0.272f, 0.534f, 0.131f, 0f, 0f,
+                0f,     0f,     0f,     1f, 0f
+            )))
+        }
+        com.example.viewmodel.ImageFilterType.INVERT -> {
+            ColorFilter.colorMatrix(ColorMatrix(floatArrayOf(
+                -1f,  0f,  0f, 0f, 1f,
+                 0f, -1f,  0f, 0f, 1f,
+                 0f,  0f, -1f, 0f, 1f,
+                 0f,  0f,  0f, 1f, 0f
+            )))
+        }
+        com.example.viewmodel.ImageFilterType.WARM -> {
+            ColorFilter.colorMatrix(ColorMatrix(floatArrayOf(
+                1.2f, 0f,   0f,   0f, 0f,
+                0f,   1.1f, 0f,   0f, 0f,
+                0f,   0f,   0.8f, 0f, 0f,
+                0f,   0f,   0f,   1f, 0f
+            )))
+        }
+        com.example.viewmodel.ImageFilterType.COOL -> {
+            ColorFilter.colorMatrix(ColorMatrix(floatArrayOf(
+                0.8f, 0f,   0f,   0f, 0f,
+                0f,   0.9f, 0f,   0f, 0f,
+                0f,   0f,   1.3f, 0f, 0f,
+                0f,   0f,   0f,   1f, 0f
+            )))
+        }
+        com.example.viewmodel.ImageFilterType.HIGH_CONTRAST -> {
+            ColorFilter.colorMatrix(ColorMatrix(floatArrayOf(
+                1.3f, 0f,   0f,   0f, -38.25f/255f,
+                0f,   1.3f, 0f,   0f, -38.25f/255f,
+                0f,   0f,   1.3f, 0f, -38.25f/255f,
+                0f,   0f,   0f,   1f, 0f
+            )))
         }
     }
 }

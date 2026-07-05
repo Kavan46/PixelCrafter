@@ -65,10 +65,149 @@ class WallpaperViewModel(application: Application) : AndroidViewModel(applicatio
     val firebaseDbService = com.example.data.FirebaseDatabaseService(application, repository, viewModelScope)
     val firebaseFirestoreService = com.example.data.FirebaseFirestoreService(application, repository, viewModelScope)
 
+    val isFetchingWallpapers: StateFlow<Boolean> = firebaseFirestoreService.isFetchingWallpapers
+
     private val _authError = MutableStateFlow<String?>(null)
     val authError: StateFlow<String?> = _authError.asStateFlow()
 
     init {
+        // Pre-populate with high-quality default wallpapers if local database is completely empty
+        viewModelScope.launch(Dispatchers.IO) {
+            try {
+                val currentList = repository.allWallpapers.first()
+                if (currentList.isEmpty()) {
+                    android.util.Log.d("WallpaperViewModel", "Local database is empty. Pre-populating default high-res wallpapers...")
+                    val defaults = listOf(
+                        Wallpaper(
+                            id = 1,
+                            title = "Ethereal Valley",
+                            category = "Nature",
+                            imageUrl = "https://images.unsplash.com/photo-1506744038136-46273834b3fb?q=80&w=1000&auto=format&fit=crop",
+                            author = "Unsplash Artist",
+                            downloads = 1420,
+                            isFavorite = false,
+                            isCustom = false
+                        ),
+                        Wallpaper(
+                            id = 2,
+                            title = "Majestic Peak",
+                            category = "Nature",
+                            imageUrl = "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?q=80&w=1000&auto=format&fit=crop",
+                            author = "Peak Captures",
+                            downloads = 980,
+                            isFavorite = false,
+                            isCustom = false
+                        ),
+                        Wallpaper(
+                            id = 3,
+                            title = "Cosmic Nexus",
+                            category = "Space",
+                            imageUrl = "https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=1000&auto=format&fit=crop",
+                            author = "Nebula Astro",
+                            downloads = 2150,
+                            isFavorite = false,
+                            isCustom = false
+                        ),
+                        Wallpaper(
+                            id = 4,
+                            title = "Oceanic Pulse",
+                            category = "Nature",
+                            imageUrl = "https://images.unsplash.com/photo-1505118380757-91f5f5632de0?q=80&w=1000&auto=format&fit=crop",
+                            author = "Deep Blue",
+                            downloads = 830,
+                            isFavorite = false,
+                            isCustom = false
+                        ),
+                        Wallpaper(
+                            id = 5,
+                            title = "Whispering Woods",
+                            category = "Nature",
+                            imageUrl = "https://images.unsplash.com/photo-1441974231531-c6227db76b6e?q=80&w=1000&auto=format&fit=crop",
+                            author = "Eco Shoot",
+                            downloads = 1100,
+                            isFavorite = false,
+                            isCustom = false
+                        ),
+                        Wallpaper(
+                            id = 6,
+                            title = "Golden Dunes",
+                            category = "Nature",
+                            imageUrl = "https://images.unsplash.com/photo-1509316975850-ff9c5deb0cd9?q=80&w=1000&auto=format&fit=crop",
+                            author = "Sand Wanderer",
+                            downloads = 760,
+                            isFavorite = false,
+                            isCustom = false
+                        ),
+                        Wallpaper(
+                            id = 7,
+                            title = "Cyber Neon City",
+                            category = "Abstract",
+                            imageUrl = "https://images.unsplash.com/photo-1515621061946-eff1c2a352bd?q=80&w=1000&auto=format&fit=crop",
+                            author = "Retro Wave",
+                            downloads = 3400,
+                            isFavorite = false,
+                            isCustom = false
+                        ),
+                        Wallpaper(
+                            id = 8,
+                            title = "Zen Flora",
+                            category = "Abstract",
+                            imageUrl = "https://images.unsplash.com/photo-1518531933037-91b2f5f229cc?q=80&w=1000&auto=format&fit=crop",
+                            author = "Mindfulness Design",
+                            downloads = 1290,
+                            isFavorite = false,
+                            isCustom = false
+                        ),
+                        Wallpaper(
+                            id = 9,
+                            title = "Emerald Vista",
+                            category = "Nature",
+                            imageUrl = "https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?q=80&w=1000&auto=format&fit=crop",
+                            author = "Wilderness Lens",
+                            downloads = 1870,
+                            isFavorite = false,
+                            isCustom = false
+                        ),
+                        Wallpaper(
+                            id = 10,
+                            title = "Northern Symphony",
+                            category = "Space",
+                            imageUrl = "https://images.unsplash.com/photo-1483347756197-71ef80e95f73?q=80&w=1000&auto=format&fit=crop",
+                            author = "Aurora Hunter",
+                            downloads = 2950,
+                            isFavorite = false,
+                            isCustom = false
+                        ),
+                        Wallpaper(
+                            id = 11,
+                            title = "Crimson Twilight",
+                            category = "Sunset",
+                            imageUrl = "https://images.unsplash.com/photo-1506012787146-f92b2d7d6d96?q=80&w=1000&auto=format&fit=crop",
+                            author = "Twilight Wanderer",
+                            downloads = 4120,
+                            isFavorite = false,
+                            isCustom = false
+                        ),
+                        Wallpaper(
+                            id = 12,
+                            title = "Golden Cruiser",
+                            category = "Retro",
+                            imageUrl = "https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?q=80&w=1000&auto=format&fit=crop",
+                            author = "Cruisin' Art",
+                            downloads = 5120,
+                            isFavorite = false,
+                            isCustom = false
+                        )
+                    )
+                    for (wp in defaults) {
+                        repository.insertWallpaper(wp)
+                    }
+                }
+            } catch (e: Exception) {
+                android.util.Log.e("WallpaperViewModel", "Error pre-populating default wallpapers: ${e.message}", e)
+            }
+        }
+
         viewModelScope.launch {
             authService.currentUserFlow.collect { firebaseUser ->
                 if (firebaseUser != null) {
@@ -251,13 +390,30 @@ class WallpaperViewModel(application: Application) : AndroidViewModel(applicatio
         return true
     }
 
-    // Reactive Wallpapers Feed with enhanced search filtering by category and metadata
+    private val _galleryFilter = MutableStateFlow("ALL")
+    val galleryFilter: StateFlow<String> = _galleryFilter.asStateFlow()
+
+    fun updateGalleryFilter(filter: String) {
+        _galleryFilter.value = filter
+    }
+
+    // Reactive Wallpapers Feed with enhanced search filtering by category, gallery filter, and metadata
     val wallpapers: StateFlow<List<Wallpaper>> = combine(
         repository.allWallpapers,
         _selectedCategory,
-        _searchQuery
-    ) { all, category, query ->
+        _searchQuery,
+        _galleryFilter
+    ) { all, category, query, filter ->
         var list = all
+        
+        // Apply gallery filter
+        list = when (filter) {
+            "TRENDING" -> list.sortedByDescending { it.downloads }
+            "FAVORITES" -> list.filter { it.isFavorite }
+            "CUSTOM" -> list.filter { it.isCustom }
+            else -> list
+        }
+
         if (category != "All") {
             list = list.filter { it.category.equals(category, ignoreCase = true) }
         }
@@ -334,7 +490,7 @@ class WallpaperViewModel(application: Application) : AndroidViewModel(applicatio
         }
     }
 
-    // Add high resolution wallpapers (Admin mode) - Stores the uncompressed original locally and uploads high-resolution 1080p artwork directly to Firestore
+    // Add high resolution wallpapers (Admin mode) - Stores the uncompressed original locally, uploads high-resolution artwork to Firebase Storage, and saves its download URL in Firestore
     fun addWallpaper(title: String, category: String, url: String, author: String, firebaseSyncUrl: String? = null, isPublic: Boolean = true) {
         if (title.isBlank() || url.isBlank() || category.isBlank()) {
             _addWallpaperStatus.value = "Error: All fields are required to craft."
@@ -347,12 +503,12 @@ class WallpaperViewModel(application: Application) : AndroidViewModel(applicatio
 
         viewModelScope.launch {
             try {
-                _addWallpaperStatus.value = "Syncing high-resolution artwork to Firestore..."
+                _addWallpaperStatus.value = "Registering artwork in local database..."
                 
                 // Keep the uncompressed original local file for the local SQLite DB representation
                 val localUrl = url
-                // Use the high-resolution Base64 string for remote syncing to Firestore
-                val remoteUrl = firebaseSyncUrl ?: url
+                // Default fallback url
+                var remoteUrl = firebaseSyncUrl ?: url
 
                 val newWallpaper = Wallpaper(
                     title = title,
@@ -365,6 +521,23 @@ class WallpaperViewModel(application: Application) : AndroidViewModel(applicatio
                 val generatedId = repository.insertWallpaper(newWallpaper).toInt()
                 
                 if (firebaseFirestoreService.isFirebaseInitialized) {
+                    _addWallpaperStatus.value = "Uploading high-resolution artwork to Firebase Storage..."
+                    try {
+                        val storage = com.google.firebase.storage.FirebaseStorage.getInstance()
+                        val filename = "img_${generatedId}_${System.currentTimeMillis()}.jpg"
+                        val storageRef = storage.reference.child("images/$filename")
+                        
+                        val fileUri = Uri.parse(localUrl)
+                        storageRef.putFile(fileUri).await()
+                        
+                        _addWallpaperStatus.value = "Retrieving storage download URL..."
+                        val downloadUri = storageRef.downloadUrl.await()
+                        remoteUrl = downloadUri.toString()
+                    } catch (storageEx: Exception) {
+                        android.util.Log.e("WallpaperViewModel", "Firebase Storage upload failed, using fallback URL", storageEx)
+                    }
+
+                    _addWallpaperStatus.value = "Syncing wallpaper metadata to Firestore..."
                     val finalWp = newWallpaper.copy(id = generatedId, imageUrl = remoteUrl)
                     firebaseFirestoreService.uploadWallpaper(finalWp, isPublic = isPublic)
                     val adminId = authService.currentUser?.uid ?: "admin"
@@ -378,7 +551,7 @@ class WallpaperViewModel(application: Application) : AndroidViewModel(applicatio
     }
 
     // Process selected local Uri: copies original high-res image directly into internal persistent storage (no compression),
-    // and generates a high-quality 1080p JPEG Base64 representation (crisp quality, safe for Firestore 1MB limits).
+    // and generates a high-quality JPEG Base64 representation (crisp quality, safe for Firestore 1MB limits).
     fun processSelectedImage(uri: Uri, callback: (localPath: String, base64String: String?) -> Unit) {
         viewModelScope.launch(Dispatchers.IO) {
             try {
@@ -399,7 +572,7 @@ class WallpaperViewModel(application: Application) : AndroidViewModel(applicatio
                 }
                 val localPath = "file://${localFile.absolutePath}"
 
-                // 2. Generate high-quality 1080p JPEG Base64 representation for Firestore sync
+                // 2. Generate pristine, ultra high-quality JPEG Base64 representation for Firestore sync
                 var base64Result: String? = null
                 try {
                     context.contentResolver.openInputStream(uri)?.use { input ->
@@ -409,12 +582,14 @@ class WallpaperViewModel(application: Application) : AndroidViewModel(applicatio
                         android.graphics.BitmapFactory.decodeStream(input, null, options)
                         
                         var scale = 1
-                        val maxTargetDim = 1080
                         val rawWidth = options.outWidth
                         val rawHeight = options.outHeight
+                        val maxTargetDim = 1920 // Target ultra-crisp resolution suitable for FHD/2K phone screens
                         
-                        while ((rawWidth / scale) > maxTargetDim * 2 || (rawHeight / scale) > maxTargetDim * 2) {
-                            scale *= 2
+                        if (rawWidth > 0 && rawHeight > 0) {
+                            while ((rawWidth / scale) > maxTargetDim * 2 || (rawHeight / scale) > maxTargetDim * 2) {
+                                scale *= 2
+                            }
                         }
                         
                         val decodeOptions = android.graphics.BitmapFactory.Options().apply {
@@ -424,29 +599,71 @@ class WallpaperViewModel(application: Application) : AndroidViewModel(applicatio
                         context.contentResolver.openInputStream(uri)?.use { nextInput ->
                             val decoded = android.graphics.BitmapFactory.decodeStream(nextInput, null, decodeOptions)
                             if (decoded != null) {
-                                val currentWidth = decoded.width
-                                val currentHeight = decoded.height
-                                val finalBitmap = if (currentWidth > maxTargetDim || currentHeight > maxTargetDim) {
+                                val SAFE_BYTE_LIMIT = 720000 // Safely under 1MB Firestore doc limit
+                                var currentQuality = 90
+                                var currentTargetDim = 1920
+                                var finalByteArray: ByteArray? = null
+                                var attempts = 0
+                                
+                                while (attempts < 12 && finalByteArray == null) {
+                                    val currentWidth = decoded.width
+                                    val currentHeight = decoded.height
+                                    val largerDim = maxOf(currentWidth, currentHeight)
+                                    
+                                    val scaledBitmap = if (largerDim > currentTargetDim) {
+                                        val ratio = currentWidth.toFloat() / currentHeight.toFloat()
+                                        val (newW, newH) = if (currentWidth > currentHeight) {
+                                            currentTargetDim to (currentTargetDim / ratio).toInt()
+                                        } else {
+                                            (currentTargetDim * ratio).toInt() to currentTargetDim
+                                        }
+                                        Bitmap.createScaledBitmap(decoded, newW, newH, true)
+                                    } else {
+                                        decoded
+                                    }
+                                    
+                                    val outStream = java.io.ByteArrayOutputStream()
+                                    scaledBitmap.compress(Bitmap.CompressFormat.JPEG, currentQuality, outStream)
+                                    val byteArray = outStream.toByteArray()
+                                    
+                                    if (scaledBitmap != decoded) {
+                                        scaledBitmap.recycle()
+                                    }
+                                    
+                                    if (byteArray.size <= SAFE_BYTE_LIMIT) {
+                                        finalByteArray = byteArray
+                                    } else {
+                                        // Intelligently scale down step-by-step
+                                        if (currentQuality > 80) {
+                                            currentQuality -= 5
+                                        } else if (currentTargetDim > 1200) {
+                                            currentTargetDim = (currentTargetDim * 0.85f).toInt()
+                                        } else {
+                                            currentQuality -= 5
+                                        }
+                                        attempts++
+                                    }
+                                }
+                                
+                                // Absolute safe fallback using the last scaled target size rather than original decoded
+                                if (finalByteArray == null) {
+                                    val outStream = java.io.ByteArrayOutputStream()
+                                    val currentWidth = decoded.width
+                                    val currentHeight = decoded.height
                                     val ratio = currentWidth.toFloat() / currentHeight.toFloat()
                                     val (newW, newH) = if (currentWidth > currentHeight) {
-                                        maxTargetDim to (maxTargetDim / ratio).toInt()
+                                        1280 to (1280 / ratio).toInt()
                                     } else {
-                                        (maxTargetDim * ratio).toInt() to maxTargetDim
+                                        (1280 * ratio).toInt() to 1280
                                     }
-                                    Bitmap.createScaledBitmap(decoded, newW, newH, true)
-                                } else {
-                                    decoded
+                                    val scaledBitmap = Bitmap.createScaledBitmap(decoded, newW, newH, true)
+                                    scaledBitmap.compress(Bitmap.CompressFormat.JPEG, 75, outStream)
+                                    finalByteArray = outStream.toByteArray()
+                                    scaledBitmap.recycle()
                                 }
                                 
-                                val outStream = java.io.ByteArrayOutputStream()
-                                finalBitmap.compress(Bitmap.CompressFormat.JPEG, 85, outStream)
-                                val byteArray = outStream.toByteArray()
-                                val encoded = android.util.Base64.encodeToString(byteArray, android.util.Base64.NO_WRAP)
+                                val encoded = android.util.Base64.encodeToString(finalByteArray, android.util.Base64.NO_WRAP)
                                 base64Result = "data:image/jpeg;base64,$encoded"
-                                
-                                if (finalBitmap != decoded) {
-                                    finalBitmap.recycle()
-                                }
                                 decoded.recycle()
                             }
                         }
@@ -510,11 +727,12 @@ class WallpaperViewModel(application: Application) : AndroidViewModel(applicatio
         }
     }
 
-    fun setWallpaper(context: Context, wallpaper: Wallpaper, home: Boolean, lock: Boolean) {
+    fun setWallpaper(context: Context, wallpaper: Wallpaper, home: Boolean, lock: Boolean, filter: ImageFilterType = ImageFilterType.NONE) {
         _operationLoading.value = true
         viewModelScope.launch {
-            val bitmap = fetchBitmapFromUrl(context, wallpaper.imageUrl)
-            if (bitmap != null) {
+            var rawBitmap = fetchBitmapFromUrl(context, wallpaper.imageUrl)
+            if (rawBitmap != null) {
+                val bitmap = if (filter != ImageFilterType.NONE) applyFilterToBitmap(rawBitmap, filter) else rawBitmap
                 val wallpaperManager = WallpaperManager.getInstance(context)
                 try {
                     withContext(Dispatchers.IO) {
@@ -546,11 +764,12 @@ class WallpaperViewModel(application: Application) : AndroidViewModel(applicatio
         }
     }
 
-    fun downloadWallpaper(context: Context, wallpaper: Wallpaper) {
+    fun downloadWallpaper(context: Context, wallpaper: Wallpaper, filter: ImageFilterType = ImageFilterType.NONE) {
         _operationLoading.value = true
         viewModelScope.launch {
-            val bitmap = fetchBitmapFromUrl(context, wallpaper.imageUrl)
-            if (bitmap != null) {
+            var rawBitmap = fetchBitmapFromUrl(context, wallpaper.imageUrl)
+            if (rawBitmap != null) {
+                val bitmap = if (filter != ImageFilterType.NONE) applyFilterToBitmap(rawBitmap, filter) else rawBitmap
                 val savedFilename = "PixelCrafter_${wallpaper.title.replace(" ", "_")}_${System.currentTimeMillis()}.jpg"
                 var success = false
                 try {
@@ -612,5 +831,85 @@ class WallpaperViewModel(application: Application) : AndroidViewModel(applicatio
         } catch (e: Exception) {
             Toast.makeText(context, "Error opening sharing client", Toast.LENGTH_SHORT).show()
         }
+    }
+}
+
+enum class ImageFilterType(val displayName: String) {
+    NONE("Original"),
+    GRAYSCALE("Mono Chrome"),
+    SEPIA("Retro Sepia"),
+    INVERT("Negative Void"),
+    WARM("Golden Glow"),
+    COOL("Ice Nebula"),
+    HIGH_CONTRAST("Deep Neon")
+}
+
+fun applyFilterToBitmap(src: Bitmap, filter: ImageFilterType): Bitmap {
+    if (filter == ImageFilterType.NONE) return src
+    
+    val colorMatrix = when (filter) {
+        ImageFilterType.NONE -> return src
+        ImageFilterType.GRAYSCALE -> {
+            android.graphics.ColorMatrix().apply { setSaturation(0f) }
+        }
+        ImageFilterType.SEPIA -> {
+            android.graphics.ColorMatrix(floatArrayOf(
+                0.393f, 0.769f, 0.189f, 0f, 0f,
+                0.349f, 0.686f, 0.168f, 0f, 0f,
+                0.272f, 0.534f, 0.131f, 0f, 0f,
+                0f,     0f,     0f,     1f, 0f
+            ))
+        }
+        ImageFilterType.INVERT -> {
+            android.graphics.ColorMatrix(floatArrayOf(
+                -1f,  0f,  0f, 0f, 255f,
+                 0f, -1f,  0f, 0f, 255f,
+                 0f,  0f, -1f, 0f, 255f,
+                 0f,  0f,  0f, 1f,   0f
+            ))
+        }
+        ImageFilterType.WARM -> {
+            android.graphics.ColorMatrix(floatArrayOf(
+                1.2f, 0f,   0f,   0f, 0f,
+                0f,   1.1f, 0f,   0f, 0f,
+                0f,   0f,   0.8f, 0f, 0f,
+                0f,   0f,   0f,   1f, 0f
+            ))
+        }
+        ImageFilterType.COOL -> {
+            android.graphics.ColorMatrix(floatArrayOf(
+                0.8f, 0f,   0f,   0f, 0f,
+                0f,   0.9f, 0f,   0f, 0f,
+                0f,   0f,   1.3f, 0f, 0f,
+                0f,   0f,   0f,   1f, 0f
+            ))
+        }
+        ImageFilterType.HIGH_CONTRAST -> {
+            val matrix = android.graphics.ColorMatrix()
+            matrix.setSaturation(1.5f)
+            val scale = 1.3f
+            val translate = (-.5f * scale + .5f) * 255f
+            val contrastMatrix = android.graphics.ColorMatrix(floatArrayOf(
+                scale, 0f,    0f,    0f, translate,
+                0f,    scale, 0f,    0f, translate,
+                0f,    0f,    scale, 0f, translate,
+                0f,    0f,    0f,    1f, 0f
+            ))
+            matrix.postConcat(contrastMatrix)
+            matrix
+        }
+    }
+
+    return try {
+        val resultBitmap = Bitmap.createBitmap(src.width, src.height, src.config ?: Bitmap.Config.ARGB_8888)
+        val canvas = android.graphics.Canvas(resultBitmap)
+        val paint = android.graphics.Paint().apply {
+            colorFilter = android.graphics.ColorMatrixColorFilter(colorMatrix)
+        }
+        canvas.drawBitmap(src, 0f, 0f, paint)
+        resultBitmap
+    } catch (e: Exception) {
+        e.printStackTrace()
+        src
     }
 }

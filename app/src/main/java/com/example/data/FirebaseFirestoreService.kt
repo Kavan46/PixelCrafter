@@ -24,6 +24,9 @@ class FirebaseFirestoreService(
     private val _customCategories = MutableStateFlow<List<String>>(emptyList())
     val customCategories: StateFlow<List<String>> = _customCategories.asStateFlow()
 
+    private val _isFetchingWallpapers = MutableStateFlow(false)
+    val isFetchingWallpapers: StateFlow<Boolean> = _isFetchingWallpapers.asStateFlow()
+
     val isFirebaseInitialized: Boolean by lazy {
         try {
             val apps = FirebaseApp.getApps(context)
@@ -72,23 +75,25 @@ class FirebaseFirestoreService(
     }
 
     /**
-     * Listens to the Firestore "wallpapers" collection and keeps the local database updated.
+     * Listens to the Firestore "images" collection and keeps the local database updated.
      */
     fun startSyncingWallpapers() {
         val fs = firestore ?: return
         
         wallpapersRegistration?.remove()
+        _isFetchingWallpapers.value = true
 
         val isUserAdmin = isAdmin()
         val query = if (isUserAdmin) {
-            fs.collection("wallpapers")
+            fs.collection("images")
         } else {
-            fs.collection("wallpapers").whereEqualTo("isPublic", true)
+            fs.collection("images").whereEqualTo("isPublic", true)
         }
 
         wallpapersRegistration = query.addSnapshotListener { snapshot, error ->
+            _isFetchingWallpapers.value = false
             if (error != null) {
-                Log.e(TAG, "Error listening to wallpapers in Firestore (isAdmin=$isUserAdmin)", error)
+                Log.e(TAG, "Error listening to images in Firestore (isAdmin=$isUserAdmin)", error)
                 return@addSnapshotListener
             }
             if (snapshot != null) {
@@ -144,7 +149,7 @@ class FirebaseFirestoreService(
                             }
                         }
                     } catch (e: Exception) {
-                        Log.e(TAG, "Error syncing Firestore wallpapers to local database", e)
+                        Log.e(TAG, "Error syncing Firestore images to local database", e)
                     }
                 }
             }
@@ -152,7 +157,7 @@ class FirebaseFirestoreService(
     }
 
     /**
-     * Syncs a single wallpaper metadata mapping to the "wallpapers" collection.
+     * Syncs a single wallpaper metadata mapping to the "images" collection.
      */
     fun uploadWallpaper(wallpaper: Wallpaper, isPublic: Boolean = true) {
         val fs = firestore ?: return
@@ -181,28 +186,28 @@ class FirebaseFirestoreService(
             "isPublic" to isPublic
         )
 
-        fs.collection("wallpapers").document(targetId.toString())
+        fs.collection("images").document(targetId.toString())
             .set(data)
             .addOnSuccessListener {
-                Log.d(TAG, "Wallpaper successfully synced to Firestore with schema keys!")
+                Log.d(TAG, "Wallpaper successfully synced to Firestore 'images' with schema keys!")
             }
             .addOnFailureListener { e ->
-                Log.e(TAG, "Failed syncing wallpaper to Firestore", e)
+                Log.e(TAG, "Failed syncing wallpaper to Firestore 'images'", e)
             }
     }
 
     /**
-     * Removes a wallpaper document from the "wallpapers" collection.
+     * Removes a wallpaper document from the "images" collection.
      */
     fun deleteWallpaperFromFirebase(wallpaperId: Int) {
         val fs = firestore ?: return
-        fs.collection("wallpapers").document(wallpaperId.toString())
+        fs.collection("images").document(wallpaperId.toString())
             .delete()
             .addOnSuccessListener {
-                Log.d(TAG, "Wallpaper '$wallpaperId' successfully removed from Firestore!")
+                Log.d(TAG, "Wallpaper '$wallpaperId' successfully removed from Firestore 'images'!")
             }
             .addOnFailureListener { e ->
-                Log.e(TAG, "Failed to remove wallpaper '$wallpaperId' from Firestore", e)
+                Log.e(TAG, "Failed to remove wallpaper '$wallpaperId' from Firestore 'images'", e)
             }
     }
 

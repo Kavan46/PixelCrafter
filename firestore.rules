@@ -17,6 +17,13 @@ service cloud.firestore {
       allow write: if isAdmin();
     }
 
+    // Images collection rule
+    match /images/{imageId} {
+      // All users can read public images, only admins can write
+      allow read: if resource.data.isPublic == true || isAdmin();
+      allow write: if isAdmin();
+    }
+
     // Categories collection rule
     match /categories/{categoryId} {
       // Any authenticated user can read categories to populate lists, only admins can write

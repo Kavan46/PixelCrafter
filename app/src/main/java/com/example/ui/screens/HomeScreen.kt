@@ -39,7 +39,15 @@ import com.example.ui.components.rememberImageModel
 import com.example.ui.components.rememberCardImageModel
 import com.example.ui.theme.*
 import com.example.viewmodel.WallpaperViewModel
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.ui.geometry.Offset
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
     viewModel: WallpaperViewModel,
@@ -51,8 +59,11 @@ fun HomeScreen(
     val selectedCategory by viewModel.selectedCategory.collectAsStateWithLifecycle()
     val searchQuery by viewModel.searchQuery.collectAsStateWithLifecycle()
     val isAdminMode by viewModel.isAdminMode.collectAsStateWithLifecycle()
+    val isFetching by viewModel.isFetchingWallpapers.collectAsStateWithLifecycle()
+    val currentGalleryFilter by viewModel.galleryFilter.collectAsStateWithLifecycle()
 
     var showDeleteConfirmDialog by remember { mutableStateOf<Wallpaper?>(null) }
+    var gridColumns by remember { mutableStateOf(2) }
 
     Scaffold(
         modifier = modifier.fillMaxSize(),
@@ -86,22 +97,109 @@ fun HomeScreen(
                 subtitle = if (isAdminMode) "Administrative Crafting Deck activated" else "High Definition Wallpaper Studio"
             )
 
-            // Live Search Field
-            PixelCrafterSearchBar(
-                query = searchQuery,
-                onQueryChange = { viewModel.updateSearchQuery(it) },
-                placeholder = "Search wallpapers, creators..."
-            )
+            // Combined Horizontal sorting/filtering chips row and Grid Column Toggler
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 8.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                // Left side: Horizontal scroll of filters
+                androidx.compose.foundation.lazy.LazyRow(
+                    horizontalArrangement = Arrangement.spacedBy(6.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.weight(1f)
+                ) {
+                    val filters = listOf(
+                        "ALL" to "Explore 🌐",
+                        "TRENDING" to "Trending 🔥",
+                        "FAVORITES" to "Favorites ❤️",
+                        "CUSTOM" to "Custom Crafts 🎨"
+                    )
+                    items(filters.size) { index ->
+                        val (filterType, label) = filters[index]
+                        val isSelected = currentGalleryFilter == filterType
+                        FilterChip(
+                            selected = isSelected,
+                            onClick = { viewModel.updateGalleryFilter(filterType) },
+                            label = { 
+                                Text(
+                                    text = label,
+                                    fontSize = 11.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = if (isSelected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurface
+                                ) 
+                            },
+                            colors = FilterChipDefaults.filterChipColors(
+                                selectedContainerColor = MaterialTheme.colorScheme.primary,
+                                containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.5f),
+                            ),
+                            border = FilterChipDefaults.filterChipBorder(
+                                enabled = true,
+                                selected = isSelected,
+                                borderColor = MaterialTheme.colorScheme.outline,
+                                selectedBorderColor = MaterialTheme.colorScheme.primary,
+                                borderWidth = 1.dp
+                            ),
+                            shape = RoundedCornerShape(12.dp),
+                            modifier = Modifier.testTag("gallery_filter_chip_$filterType")
+                        )
+                    }
+                }
 
-            // Dynamic Category tabs
-            val categoriesList by viewModel.categoriesState.collectAsStateWithLifecycle()
-            CategorySelector(
-                categories = categoriesList,
-                selectedCategory = selectedCategory,
-                onCategorySelected = { viewModel.selectCategory(it) }
-            )
+                Spacer(modifier = Modifier.width(8.dp))
 
-            if (wallpapers.isEmpty()) {
+                // Right side: 2/2 or 3/3 grid column switcher
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(4.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    listOf(2, 3).forEach { cols ->
+                        val isSelected = gridColumns == cols
+                        Box(
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(8.dp))
+                                .background(
+                                    if (isSelected) MaterialTheme.colorScheme.primary.copy(alpha = 0.2f)
+                                    else Color.Transparent
+                                )
+                                .border(
+                                    width = 1.dp,
+                                    color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline.copy(alpha = 0.5f),
+                                    shape = RoundedCornerShape(8.dp)
+                                )
+                                .clickable { gridColumns = cols }
+                                .padding(horizontal = 10.dp, vertical = 6.dp)
+                                .testTag("grid_cols_$cols"),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                text = "${cols}x${cols}",
+                                fontSize = 11.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
+                            )
+                        }
+                    }
+                }
+            }
+
+            if (isFetching && wallpapers.isEmpty()) {
+                LazyVerticalGrid(
+                    columns = GridCells.Fixed(gridColumns),
+                    contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
+                    horizontalArrangement = Arrangement.spacedBy(14.dp),
+                    verticalArrangement = Arrangement.spacedBy(14.dp),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .weight(1f)
+                ) {
+                    items(6) { index ->
+                        ShimmerWallpaperCard(cardHeight = if (gridColumns == 3) 180.dp else 260.dp)
+                    }
+                }
+            } else if (wallpapers.isEmpty()) {
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -117,7 +215,7 @@ fun HomeScreen(
                         )
                         Spacer(modifier = Modifier.height(6.dp))
                         Text(
-                            text = "Try clearing search or upload new ones as Admin",
+                            text = "Try uploading some wallpapers as an Admin!",
                             fontSize = 14.sp,
                             color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f)
                         )
@@ -125,7 +223,7 @@ fun HomeScreen(
                 }
             } else {
                 LazyVerticalGrid(
-                    columns = GridCells.Adaptive(minSize = 160.dp),
+                    columns = GridCells.Fixed(gridColumns),
                     contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
                     horizontalArrangement = Arrangement.spacedBy(14.dp),
                     verticalArrangement = Arrangement.spacedBy(14.dp),
@@ -143,7 +241,8 @@ fun HomeScreen(
                                     showDeleteConfirmDialog = wallpaper
                                 }
                             },
-                            onFavoriteClick = { viewModel.toggleFavorite(wallpaper) }
+                            onFavoriteClick = { viewModel.toggleFavorite(wallpaper) },
+                            cardHeight = if (gridColumns == 3) 180.dp else 260.dp
                         )
                     }
                 }
@@ -192,12 +291,13 @@ fun WallpaperCard(
     isAdmin: Boolean,
     onClick: () -> Unit,
     onLongClick: () -> Unit,
-    onFavoriteClick: () -> Unit
+    onFavoriteClick: () -> Unit,
+    cardHeight: androidx.compose.ui.unit.Dp = 260.dp
 ) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .height(260.dp)
+            .height(cardHeight)
             .clip(RoundedCornerShape(20.dp))
             .border(1.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(20.dp))
             .combinedClickable(
@@ -267,5 +367,49 @@ fun WallpaperCard(
             }
         }
 
+    }
+}
+
+@Composable
+fun ShimmerWallpaperCard(cardHeight: androidx.compose.ui.unit.Dp = 260.dp) {
+    val transition = rememberInfiniteTransition(label = "shimmer")
+    val translateAnim = transition.animateFloat(
+        initialValue = 0f,
+        targetValue = 1000f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(durationMillis = 1200, easing = LinearEasing),
+            repeatMode = RepeatMode.Restart
+        ),
+        label = "shimmer_animation"
+    )
+
+    val shimmerBrush = Brush.linearGradient(
+        colors = listOf(
+            MaterialTheme.colorScheme.surface,
+            MaterialTheme.colorScheme.tertiary.copy(alpha = 0.6f),
+            MaterialTheme.colorScheme.surface,
+        ),
+        start = Offset.Zero,
+        end = Offset(x = translateAnim.value, y = translateAnim.value)
+    )
+
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(cardHeight)
+            .clip(RoundedCornerShape(20.dp))
+            .background(shimmerBrush)
+            .border(1.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(20.dp))
+    ) {
+        // Shimmer metadata footer placeholder
+        Box(
+            modifier = Modifier
+                .align(Alignment.BottomStart)
+                .padding(12.dp)
+                .width(100.dp)
+                .height(16.dp)
+                .clip(RoundedCornerShape(4.dp))
+                .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f))
+        )
     }
 }
